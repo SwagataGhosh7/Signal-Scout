@@ -8,6 +8,16 @@ import { createGroqProvider, GROQ_MODEL } from "./groq.server";
 const MODEL = "google/gemini-3-flash-preview";
 const HARVEST_MODEL = GROQ_MODEL;
 
+async function getReportModel() {
+  try {
+    const groq = createGroqProvider();
+    return groq(GROQ_MODEL);
+  } catch {
+    const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
+    return gateway(MODEL);
+  }
+}
+
 function extractJsonPayload(text: string): string {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const candidate = (fenced?.[1] ?? text).trim();
@@ -329,6 +339,232 @@ export const listDrafts = createServerFn({ method: "GET" })
       .limit(50);
     if (error) throw new Error(error.message);
     return data ?? [];
+  });
+
+// ---------- Reporting ----------
+
+const REPORT_TEMPLATE_TYPES: Record<string, string> = {
+  "Weekly Executive Digest": "Summary",
+  "Monthly Intent Analytics": "Analysis",
+  "Harvested Signals Audit Trail": "Data Log",
+  "Prioritized B2B Leads Sheet": "Leads",
+  "Sales Outreach Performance": "Performance",
+};
+
+export const fetchReportData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ template: z.string().min(1) }).parse(input))
+  .handler(async ({ data, context }) => {
+    const [targetsRes, signalsRes, leadsRes, draftsRes] = await Promise.all([
+      context.supabase.from("targets").select("id, company_name, industry, domain, created_at, last_harvested_at, notes").order("created_at", { ascending: false }),
+      context.supabase.from("signals").select("id, title, summary, signal_type, source, intent, detected_at, target_id").order("detected_at", { ascending: false }).limit(200),
+      context.supabase.from("leads").select("id, title, score, urgency, intent, status, created_at, target_id").order("score", { ascending: false }).limit(200),
+      context.supabase.from("outreach_drafts").select("id, subject, channel, created_at, lead_id").order("created_at", { ascending: false }).limit(200),
+    ]);
+
+    if (targetsRes.error) throw new Error(targetsRes.error.message);
+    if (signalsRes.error) throw new Error(signalsRes.error.message);
+    if (leadsRes.error) throw new Error(leadsRes.error.message);
+    if (draftsRes.error) throw new Error(draftsRes.error.message);
+
+    const targets = targetsRes.data ?? [];
+    const signals = signalsRes.data ?? [];
+    const leads = leadsRes.data ?? [];
+    const drafts = draftsRes.data ?? [];
+
+    const avgScore = leads.length
+      ? Math.round(leads.reduce((sum, lead) => sum + (lead.score ?? 0), 0) / leads.length)
+      : 0;
+    const highUrgency = leads.filter((lead) => lead.urgency === "high").length;
+    const qualifiedLeads = leads.filter((lead) => lead.status === "qualified").length;
+
+    const byIntent: Record<string, number> = {};
+    leads.forEach((lead) => {
+      if (lead.intent) {
+        byIntent[lead.intent] = (byIntent[lead.intent] ?? 0) + 1;
+      }
+    });
+
+    let tableRows: Array<Record<string, unknown>> = [];
+    switch (data.template) {
+      case "Weekly Executive Digest":
+        tableRows = signals.slice(0, 20).map((signal) => ({
+          title: signal.title,
+          type: signal.signal_type,
+          intent: signal.intent,
+          source: signal.source,
+          detected_at: signal.detected_at,
+        }));
+        break;
+      case "Monthly Intent Analytics":
+        tableRows = leads.slice(0, 20).map((lead) => ({
+          title: lead.title,
+          score: lead.score,
+          urgency: lead.urgency,
+          intent: lead.intent,
+          status: lead.status,
+          created_at: lead.created_at,
+        }));
+        break;
+      case "Harvested Signals Audit Trail":
+        tableRows = signals.slice(0, 50).map((signal) => ({
+          title: signal.title,
+          summary: signal.summary,
+          type: signal.signal_type,
+          source: signal.source,
+          intent: signal.intent,
+          detected_at: signal.detected_at,
+        }));
+        break;
+      case "Prioritized B2B Leads Sheet":
+        tableRows = leads.slice(0, 50).map((lead) => ({
+          title: lead.title,
+          score: lead.score,
+          urgency: lead.urgency,
+          intent: lead.intent,
+          status: lead.status,
+          created_at: lead.created_at,
+        }));
+        break;
+      case "Sales Outreach Performance":
+        tableRows = drafts.slice(0, 40).map((draft) => ({
+          subject: draft.subject,
+          channel: draft.channel,
+          created_at: draft.created_at,
+          lead_id: draft.lead_id,
+        }));
+        break;
+      default:
+        tableRows = signals.slice(0, 20).map((signal) => ({
+          title: signal.title,
+          type: signal.signal_type,
+          source: signal.source,
+          intent: signal.intent,
+        }));
+        break;
+    }
+
+    return {
+      title: data.template,
+      reportType: REPORT_TEMPLATE_TYPES[data.template] ?? "Summary",
+      generatedAt: new Date().toISOString(),
+      stats: {
+        targets: targets.length,
+        signals: signals.length,
+        leads: leads.length,
+        drafts: drafts.length,
+        avgScore,
+        highUrgency,
+        qualifiedLeads,
+        topIntent: Object.entries(byIntent).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "n/a",
+      },
+      tableRows,
+    };
+  });
+
+export const generateReportSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        payload: z
+          .object({
+            title: z.string(),
+            reportType: z.string(),
+            stats: z.record(z.union([z.string(), z.number()])),
+            tableRows: z.array(z.record(z.unknown())).optional().default([]),
+          })
+          .passthrough(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const payload = data.payload;
+    const prompt = `Write a concise executive-summary paragraph for a B2B sales reporting deck. Use the metrics below as facts and keep it professional, specific, and forward-looking.\n\nTemplate: ${payload.title}\nType: ${payload.reportType}\nStats: ${JSON.stringify(payload.stats)}\nRows: ${JSON.stringify(payload.tableRows.slice(0, 8))}\n\nReturn one short paragraph with 3-5 sentences.`;
+
+    try {
+      const model = await getReportModel();
+      const { text } = await generateText({ model, prompt });
+      const cleaned = text.replace(/\s+/g, " ").trim();
+      return { summary: cleaned || fallbackSummary(payload) };
+    } catch {
+      return { summary: fallbackSummary(payload) };
+    }
+  });
+
+function fallbackSummary(payload: { title: string; stats: Record<string, string | number> }) {
+  return `The ${payload.title.toLowerCase()} report highlights ${payload.stats.targets ?? 0} tracked targets, ${payload.stats.signals ?? 0} harvested signals, ${payload.stats.leads ?? 0} active leads, and ${payload.stats.drafts ?? 0} outreach drafts. The current momentum suggests the pipeline is progressing steadily, with ${payload.stats.avgScore ?? 0} average lead score and ${payload.stats.highUrgency ?? 0} high-urgency opportunities to prioritize. Next steps should focus on follow-up, qualification, and conversion sequencing.`;
+}
+
+export const saveReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        title: z.string().min(1),
+        report_type: z.string().min(1),
+        format: z.enum(["PDF", "CSV", "Excel"]),
+        file_name: z.string().min(1),
+        file_size: z.string().min(1),
+        download_url: z.string().nullable().optional(),
+        status: z.string().optional().default("ready"),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("reports")
+      .insert({
+        user_id: context.userId,
+        title: data.title,
+        report_type: data.report_type,
+        format: data.format,
+        file_name: data.file_name,
+        file_size: data.file_size,
+        download_url: data.download_url ?? null,
+        status: data.status,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[saveReport] Supabase insert failed:", error);
+      throw new Error(`${error.code ?? "SUPABASE_ERROR"}: ${error.message}`);
+    }
+    return row;
+  });
+
+export const listReports = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("reports")
+      .select("*")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("[listReports] Supabase select failed:", error);
+      throw new Error(`${error.code ?? "SUPABASE_ERROR"}: ${error.message}`);
+    }
+    return data ?? [];
+  });
+
+export const deleteReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("reports")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
+
+    if (error) {
+      console.error("[deleteReport] Supabase delete failed:", error);
+      throw new Error(`${error.code ?? "SUPABASE_ERROR"}: ${error.message}`);
+    }
+    return { ok: true };
   });
 
 // ---------- Dashboard stats ----------

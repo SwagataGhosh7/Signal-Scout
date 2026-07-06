@@ -17,7 +17,7 @@ function Landing() {
           <div className="grid h-8 w-8 place-items-center rounded-md bg-primary/15 text-primary">
             <Radar className="h-4 w-4" />
           </div>
-          <span className="font-semibold tracking-tight">Pulse</span>
+          <span className="font-semibold tracking-tight">Signal Scout</span>
         </Link>
         <div className="flex items-center gap-3">
           <Link
@@ -48,7 +48,7 @@ function Landing() {
           pipeline was missing.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Pulse deploys an autonomous agent swarm that watches LinkedIn, funding news, hiring
+          Signal Scout deploys an autonomous agent swarm that watches LinkedIn, Twitter/X, funding news, hiring
           posts, product launches, and web changes — then prioritizes the opportunities you
           should act on right now.
         </p>
@@ -153,7 +153,7 @@ function Landing() {
       </section>
 
       <footer className="relative z-10 border-t border-border/50 py-8 text-center text-xs text-muted-foreground">
-        Pulse · Signals Harvesting Engine
+        Signal Scout · Signals Harvesting Engine & Agentic AI Workflow System
       </footer>
     </div>
   );

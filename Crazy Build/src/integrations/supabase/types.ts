@@ -105,6 +105,45 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          created_at: string
+          download_url: string | null
+          file_name: string
+          file_size: string
+          format: string
+          id: string
+          report_type: string
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_url?: string | null
+          file_name: string
+          file_size: string
+          format: string
+          id?: string
+          report_type: string
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          download_url?: string | null
+          file_name?: string
+          file_size?: string
+          format?: string
+          id?: string
+          report_type?: string
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

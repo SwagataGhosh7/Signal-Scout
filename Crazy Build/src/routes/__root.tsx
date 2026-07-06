@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, Suspense, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
@@ -77,13 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Pulse — Signals Harvesting Engine" },
+      { title: "Signal Scout — Agentic AI Workflow System" },
       {
         name: "description",
         content:
-          "Agentic AI that captures buying, hiring, and market signals in real-time and turns them into prioritized outreach.",
+          "Signal Scout deploys autonomous agents to harvest buying, hiring, funding, and creator signals in real-time to automate B2B outreach.",
       },
-      { property: "og:title", content: "Pulse — Signals Harvesting Engine" },
+      { property: "og:title", content: "Signal Scout — Agentic AI Workflow System" },
       {
         property: "og:description",
         content: "AI signal harvesting for sales & growth teams.",
@@ -116,23 +116,61 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { CommandPalette } from "../components/command-palette";
+import { AuthProvider } from "@/lib/auth";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const routerState = router.state;
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+    const checkStartupAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('[Root] startup session check:', session ?? null);
+
+      // Debugging logs on application startup
+      console.log("[Debug Logs] === Startup ===");
+      console.log("[Debug Logs] Current URL on startup:", window.location.href);
+      console.log("[Debug Logs] Current Session on startup:", session);
+      console.log("[Debug Logs] Authenticated User on startup:", session?.user ?? null);
+      console.log("[Debug Logs] Router State on startup:", routerState);
+      console.log("[Debug Logs] ===============");
+
+      if (session) {
+        console.log('[Root] Redirecting to /app immediately on startup...');
+        router.navigate({ to: "/app", replace: true })
+          .then((res) => console.log("[Root] Startup redirect Navigation Result: success", res))
+          .catch((err) => console.error("[Root] Startup redirect Navigation Result: failed", err));
+      }
+    };
+    checkStartupAuth();
+  }, []);
+
+  // Debugging logs when router state changes
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("[Debug Logs] Router State Changed");
+      console.log("[Debug Logs] Current URL:", window.location.href);
+      console.log("[Debug Logs] Current Session:", session);
+      console.log("[Debug Logs] Authenticated User:", session?.user ?? null);
+      console.log("[Debug Logs] Router State:", routerState);
     });
-    return () => sub.subscription.unsubscribe();
-  }, [router, queryClient]);
+  }, [routerState]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster theme="dark" position="top-right" richColors />
+      <AuthProvider>
+        <Suspense fallback={
+          <div className="flex min-h-screen items-center justify-center bg-background">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        }>
+          <Outlet />
+        </Suspense>
+        <Toaster theme="dark" position="top-right" richColors />
+        <CommandPalette />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
