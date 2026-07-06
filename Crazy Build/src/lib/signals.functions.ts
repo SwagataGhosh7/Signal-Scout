@@ -1,11 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { generateText, NoObjectGeneratedError, Output } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider, requireLovableApiKey } from "./ai-gateway.server";
 import { createGroqProvider, GROQ_MODEL } from "./groq.server";
 
 const MODEL = "google/gemini-3-flash-preview";
+const HARVEST_MODEL = GROQ_MODEL;
+
+function extractJsonPayload(text: string): string {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = (fenced?.[1] ?? text).trim();
+  const firstBrace = candidate.indexOf("{");
+  const lastBrace = candidate.lastIndexOf("}");
+
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    return candidate.slice(firstBrace, lastBrace + 1);
+  }
+
+  return candidate;
+}
 
 // ---------- Targets ----------
 
@@ -131,8 +145,14 @@ export const harvestSignals = createServerFn({ method: "POST" })
       .single();
     if (tErr || !target) throw new Error(tErr?.message || "Target not found");
 
-    const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
-    const model = gateway(MODEL);
+    let model;
+    try {
+      const groq = createGroqProvider();
+      model = groq(HARVEST_MODEL);
+    } catch {
+      const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
+      model = gateway(MODEL);
+    }
 
     const prompt = `You are a B2B sales-intelligence agent. Simulate a signal-harvesting scan for the company below and return 5-8 plausible, realistic BUYING/HIRING/PARTNERSHIP signals that a growth team would care about right now.
 
@@ -151,28 +171,21 @@ For each signal:
 - score: 0-100 opportunity score (higher = hotter)
 - rationale: 1 sentence why this matters to a seller
 
-Be realistic and specific. Vary types, urgencies, and scores. Do NOT wrap in code fences.`;
+Be realistic and specific. Vary types, urgencies, and scores.
+Return ONLY valid JSON with this shape:
+{"signals":[{"signal_type":"hiring","title":"","summary":"","source":"jobs","intent":"hiring","urgency":"high","score":90,"rationale":""}]}`;
 
     let parsed: z.infer<typeof SignalSchema>;
     try {
-      const { output } = await generateText({
+      const { text } = await generateText({
         model,
-        output: Output.object({ schema: SignalSchema }),
         prompt,
       });
-      parsed = output;
+      const cleaned = extractJsonPayload(text);
+      parsed = SignalSchema.parse(JSON.parse(cleaned));
     } catch (err) {
-      if (NoObjectGeneratedError.isInstance(err)) {
-        try {
-          const cleaned = err.text?.replace(/```json|```/g, "").trim() ?? "{}";
-          parsed = SignalSchema.parse(JSON.parse(cleaned));
-        } catch {
-          throw new Error("AI returned malformed signal data");
-        }
-      } else {
-        const msg = err instanceof Error ? err.message : String(err);
-        throw new Error(`AI harvest failed: ${msg}`);
-      }
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`AI harvest failed: ${msg}`);
     }
 
     // Insert signals
@@ -268,27 +281,22 @@ Rules:
 - Friendly, not salesy
 - No hype words ("revolutionary", "game-changer")
 
-Return only subject and body.`;
+Return ONLY valid JSON with this shape:
+{"subject":"","body":""}`;
 
     let parsed: z.infer<typeof OutreachSchema>;
     try {
-      const { output } = await generateText({
+      const { text } = await generateText({
         model,
-        output: Output.object({ schema: OutreachSchema }),
         prompt,
       });
-      parsed = output;
-    } catch (err) {
-      if (NoObjectGeneratedError.isInstance(err)) {
-        const cleaned = err.text?.replace(/```json|```/g, "").trim() ?? "";
-        try {
-          parsed = OutreachSchema.parse(JSON.parse(cleaned));
-        } catch {
-          parsed = { subject: `Quick idea for ${target?.company_name ?? "you"}`, body: cleaned || "(AI draft unavailable)" };
-        }
-      } else {
-        throw err;
-      }
+      const cleaned = extractJsonPayload(text);
+      parsed = OutreachSchema.parse(JSON.parse(cleaned));
+    } catch {
+      parsed = {
+        subject: `Quick idea for ${target?.company_name ?? "you"}`,
+        body: "I can help you turn this signal into a simple outreach note if you want to review it.",
+      };
     }
 
     const { data: draft, error } = await context.supabase
