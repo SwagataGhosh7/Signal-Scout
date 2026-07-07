@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with persistent volume
+  postgres:
+    image: postgres:15-alpine
+    container_name: target-management-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-targetsadmin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-securepassword123}
+      POSTGRES_DB: ${DB_NAME:-target_accounts}
+    ports:
+      - '5432:5432'
+    volumes:
+      - target-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-targetsadmin}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - target-network
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: target-management-api
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-targetsadmin}
+      DB_PASSWORD: ${DB_PASSWORD:-securepassword123}
+      DB_NAME: ${DB_NAME:-target_accounts}
+      DB_POOL_MIN: 2
+      DB_POOL_MAX: 10
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+    networks:
+      - target-network
+    command: npm run dev
+
+  # Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3001
+    container_name: target-management-ui
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    ports:
+      - '8081:5173'
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+    networks:
+      - target-network
+    command: npm run dev
+
+volumes:
+  target-db-volume:
+    driver: local
+
+networks:
+  target-network:
+    driver: bridge
