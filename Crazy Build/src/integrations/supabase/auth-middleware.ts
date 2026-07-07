@@ -56,19 +56,23 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     const authHeader = request.headers.get("authorization");
 
     if (!authHeader) {
+      console.error("[Supabase Auth Middleware] Missing Authorization header.");
       throw new Error("Unauthorized: No authorization header provided");
     }
 
     if (!authHeader.startsWith("Bearer ")) {
+      console.error("[Supabase Auth Middleware] Invalid Authorization scheme:", authHeader);
       throw new Error("Unauthorized: Only Bearer tokens are supported");
     }
 
     const token = authHeader.replace("Bearer ", "");
     if (!token) {
+      console.error("[Supabase Auth Middleware] Authorization header contained empty token.");
       throw new Error("Unauthorized: No token provided");
     }
 
     if (token.split(".").length !== 3) {
+      console.error("[Supabase Auth Middleware] Malformed token detected.");
       throw new Error("Unauthorized: Invalid token");
     }
 
@@ -88,10 +92,15 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
 
     const { data, error } = await supabase.auth.getClaims(token);
     if (error || !data?.claims) {
-      throw new Error("Unauthorized: Invalid token");
+      console.error(
+        "[Supabase Auth Middleware] Token verification failed.",
+        error ? error.message : "No claims returned.",
+      );
+      throw new Error("Unauthorized: Invalid or expired token");
     }
 
     if (!data.claims.sub) {
+      console.error("[Supabase Auth Middleware] Token verified but missing user ID claim.", data.claims);
       throw new Error("Unauthorized: No user ID found in token");
     }
 
