@@ -8,7 +8,13 @@ import { Check, Loader2, Radar, Sparkles, Target as TargetIcon, X } from "lucide
 
 const KEY = "pulse.onboarding.dismissed";
 
-export function OnboardingWizard({ hasTargets, onDone }: { hasTargets: boolean; onDone?: () => void }) {
+export function OnboardingWizard({
+  hasTargets,
+  onDone,
+}: {
+  hasTargets: boolean;
+  onDone?: () => void;
+}) {
   const dismissed = typeof window !== "undefined" && localStorage.getItem(KEY) === "1";
   const [open, setOpen] = useState(!hasTargets && !dismissed);
   const [step, setStep] = useState(0);
@@ -66,7 +72,10 @@ export function OnboardingWizard({ hasTargets, onDone }: { hasTargets: boolean; 
               Deploy your first signal agent
             </h2>
           </div>
-          <button onClick={dismiss} className="rounded-md p-1 text-muted-foreground hover:bg-accent">
+          <button
+            onClick={dismiss}
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -76,12 +85,27 @@ export function OnboardingWizard({ hasTargets, onDone }: { hasTargets: boolean; 
         {step === 0 && (
           <div className="mt-6 space-y-4">
             <div className="grid grid-cols-3 gap-3">
-              <IntroCard icon={TargetIcon} title="1. Add a target" body="Company you want to monitor" />
-              <IntroCard icon={Radar} title="2. Harvest signals" body="AI scans intent & activity" />
-              <IntroCard icon={Sparkles} title="3. Get leads" body="Scored, ranked, ready to work" />
+              <IntroCard
+                icon={TargetIcon}
+                title="1. Add a target"
+                body="Company you want to monitor"
+              />
+              <IntroCard
+                icon={Radar}
+                title="2. Harvest signals"
+                body="AI scans intent & activity"
+              />
+              <IntroCard
+                icon={Sparkles}
+                title="3. Get leads"
+                body="Scored, ranked, ready to work"
+              />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <button onClick={dismiss} className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent">
+              <button
+                onClick={dismiss}
+                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
+              >
                 Skip
               </button>
               <button
@@ -103,7 +127,8 @@ export function OnboardingWizard({ hasTargets, onDone }: { hasTargets: boolean; 
             className="mt-6 space-y-3"
           >
             <p className="text-sm text-muted-foreground">
-              Pick a company to monitor. Real ones work best — try a competitor or account you're chasing.
+              Pick a company to monitor. Real ones work best — try a competitor or account you're
+              chasing.
             </p>
             <input
               required
@@ -128,7 +153,11 @@ export function OnboardingWizard({ hasTargets, onDone }: { hasTargets: boolean; 
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={() => setStep(0)} className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent">
+              <button
+                type="button"
+                onClick={() => setStep(0)}
+                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
+              >
                 Back
               </button>
               <button
@@ -150,12 +179,15 @@ export function OnboardingWizard({ hasTargets, onDone }: { hasTargets: boolean; 
                 Target <span className="font-semibold">{form.company_name}</span> created.
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
-                Now run the Signal Collection agent. It'll scan for hiring, funding, product, and intent
-                signals, then score opportunities into leads.
+                Now run the Signal Collection agent. It'll scan for hiring, funding, product, and
+                intent signals, then score opportunities into leads.
               </p>
             </div>
             <div className="flex justify-end gap-2">
-              <button onClick={dismiss} className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent">
+              <button
+                onClick={dismiss}
+                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
+              >
                 I'll do it later
               </button>
               <button

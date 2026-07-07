@@ -37,8 +37,9 @@ export const syncLeadToCrm = createServerFn({ method: "POST" })
       .single();
     if (error || !lead) throw new Error(error?.message ?? "Lead not found");
 
-    const target = (lead as { targets?: { company_name?: string; domain?: string; industry?: string } })
-      .targets;
+    const target = (
+      lead as { targets?: { company_name?: string; domain?: string; industry?: string } }
+    ).targets;
 
     const dealBody = {
       properties: {
@@ -57,7 +58,9 @@ export const syncLeadToCrm = createServerFn({ method: "POST" })
     });
     const dealJson = await dealRes.json();
     if (!dealRes.ok) {
-      throw new Error(`HubSpot deal create failed [${dealRes.status}]: ${JSON.stringify(dealJson)}`);
+      throw new Error(
+        `HubSpot deal create failed [${dealRes.status}]: ${JSON.stringify(dealJson)}`,
+      );
     }
 
     // Also create/find a company if we have a domain

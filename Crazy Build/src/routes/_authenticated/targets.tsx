@@ -16,7 +16,7 @@ import {
   Play,
   Settings,
   History,
-  FileText
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -86,7 +86,9 @@ function TargetsPage() {
   const harvest = useMutation({
     mutationFn: (id: string) => harvestFn({ data: { target_id: id } }),
     onSuccess: (r) => {
-      toast.success(`Harvest completed: ${r.signals_created} signals & ${r.leads_created} hot leads generated.`);
+      toast.success(
+        `Harvest completed: ${r.signals_created} signals & ${r.leads_created} hot leads generated.`,
+      );
       qc.invalidateQueries();
     },
     onError: (e) => toast.error(e.message),
@@ -98,8 +100,8 @@ function TargetsPage() {
     const pMatch = rawNotes.match(/\[Priority:\s*([^\]]+)\]/i);
     const oMatch = rawNotes.match(/\[Owner:\s*([^\]]+)\]/i);
     const sMatch = rawNotes.match(/\[Status:\s*([^\]]+)\]/i);
-    
-    let cleanNotes = rawNotes
+
+    const cleanNotes = rawNotes
       .replace(/\[Priority:\s*([^\]]+)\]/i, "")
       .replace(/\[Owner:\s*([^\]]+)\]/i, "")
       .replace(/\[Status:\s*([^\]]+)\]/i, "")
@@ -131,9 +133,12 @@ function TargetsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-widest text-primary">Signal collection agent</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gradient">Target Companies</h1>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gradient">
+            Target Companies
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Configure monitoring logs for targeted B2B entities. Trigger manual scans or toggle auto-harvest settings.
+            Configure monitoring logs for targeted B2B entities. Trigger manual scans or toggle
+            auto-harvest settings.
           </p>
         </div>
       </div>
@@ -227,7 +232,7 @@ function TargetsPage() {
           q.data.map((t) => {
             const parsed = parseNotes(t.notes);
             const isHarvesting = harvest.isPending && harvest.variables === t.id;
-            
+
             // Mock calculated Risk & Intent Levels based on industry and name length for variety
             const intentLevel = t.company_name.length > 7 ? "HIGH" : "MEDIUM";
             const riskLevel = t.company_name.length % 3 === 0 ? "LOW" : "MEDIUM";
@@ -256,17 +261,21 @@ function TargetsPage() {
 
                   {/* Priority and Owner tags */}
                   <div className="flex flex-wrap gap-2 items-center text-[10px]">
-                    <span className={`rounded px-2 py-0.5 border font-semibold uppercase tracking-wider ${getPriorityBadge(parsed.priority)}`}>
+                    <span
+                      className={`rounded px-2 py-0.5 border font-semibold uppercase tracking-wider ${getPriorityBadge(parsed.priority)}`}
+                    >
                       {parsed.priority}
                     </span>
                     <span className="rounded px-2 py-0.5 bg-muted/60 text-muted-foreground font-mono flex items-center gap-1">
                       <User className="h-3 w-3" /> {parsed.owner}
                     </span>
-                    <span className={`rounded-full px-2 py-0.5 font-mono text-[9px] uppercase ${
-                      parsed.status === "active"
-                        ? "bg-success/10 text-success border border-success/30"
-                        : "bg-muted text-muted-foreground"
-                    }`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 font-mono text-[9px] uppercase ${
+                        parsed.status === "active"
+                          ? "bg-success/10 text-success border border-success/30"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
                       {parsed.status}
                     </span>
                   </div>
@@ -275,19 +284,29 @@ function TargetsPage() {
                 {/* Scraped AI stats metrics row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-background/30 rounded-xl border border-border/40 p-3 text-xs">
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-mono block">AI Intent level</span>
-                    <span className={`font-semibold mt-0.5 inline-block ${intentLevel === "HIGH" ? "text-primary" : "text-foreground"}`}>
+                    <span className="text-[10px] text-muted-foreground uppercase font-mono block">
+                      AI Intent level
+                    </span>
+                    <span
+                      className={`font-semibold mt-0.5 inline-block ${intentLevel === "HIGH" ? "text-primary" : "text-foreground"}`}
+                    >
                       {intentLevel}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-mono block">Calculated Risk</span>
-                    <span className={`font-semibold mt-0.5 inline-block ${riskLevel === "LOW" ? "text-success" : "text-warning"}`}>
+                    <span className="text-[10px] text-muted-foreground uppercase font-mono block">
+                      Calculated Risk
+                    </span>
+                    <span
+                      className={`font-semibold mt-0.5 inline-block ${riskLevel === "LOW" ? "text-success" : "text-warning"}`}
+                    >
                       {riskLevel} RISK
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-mono block">Last Harvested</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-mono block">
+                      Last Harvested
+                    </span>
                     <span className="font-semibold mt-0.5 inline-block text-foreground truncate">
                       {t.last_harvested_at
                         ? formatDistanceToNow(new Date(t.last_harvested_at), { addSuffix: true })
@@ -295,7 +314,9 @@ function TargetsPage() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-mono block">Actions Queue</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-mono block">
+                      Actions Queue
+                    </span>
                     <button
                       onClick={() => setShowHistory(showHistory === t.id ? null : t.id)}
                       className="text-primary hover:underline font-semibold flex items-center gap-1 mt-0.5 text-left"
@@ -308,13 +329,16 @@ function TargetsPage() {
                 {/* Sub notes */}
                 {parsed.cleanNotes && (
                   <p className="text-xs text-muted-foreground italic bg-muted/10 p-2.5 rounded-lg border border-border/30">
-                    <span className="font-semibold text-primary">ICP Context:</span> {parsed.cleanNotes}
+                    <span className="font-semibold text-primary">ICP Context:</span>{" "}
+                    {parsed.cleanNotes}
                   </p>
                 )}
 
                 {/* Action Buttons */}
                 <div className="flex justify-between items-center border-t border-border/40 pt-3">
-                  <span className="text-[10px] text-muted-foreground font-mono">ID: {t.id.slice(0, 8)}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    ID: {t.id.slice(0, 8)}
+                  </span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => harvest.mutate(t.id)}

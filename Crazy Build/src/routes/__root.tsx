@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeProvider } from "../components/theme-provider";
 
 function NotFoundComponent() {
   return (
@@ -92,6 +93,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Unbounded:wght@200..900&display=swap",
+      },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
@@ -126,8 +133,10 @@ function RootComponent() {
 
   useEffect(() => {
     const checkStartupAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('[Root] startup session check:', session ?? null);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      console.log("[Root] startup session check:", session ?? null);
 
       // Debugging logs on application startup
       console.log("[Debug Logs] === Startup ===");
@@ -138,8 +147,9 @@ function RootComponent() {
       console.log("[Debug Logs] ===============");
 
       if (session) {
-        console.log('[Root] Redirecting to /app immediately on startup...');
-        router.navigate({ to: "/app", replace: true })
+        console.log("[Root] Redirecting to /app immediately on startup...");
+        router
+          .navigate({ to: "/app", replace: true })
           .then((res) => console.log("[Root] Startup redirect Navigation Result: success", res))
           .catch((err) => console.error("[Root] Startup redirect Navigation Result: failed", err));
       }
@@ -160,17 +170,21 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Suspense fallback={
-          <div className="flex min-h-screen items-center justify-center bg-background">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        }>
-          <Outlet />
-        </Suspense>
-        <Toaster theme="dark" position="top-right" richColors />
-        <CommandPalette />
-      </AuthProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="signal-scout-theme">
+        <AuthProvider>
+          <Suspense
+            fallback={
+              <div className="flex min-h-screen items-center justify-center bg-background">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
+          <Toaster theme="dark" position="top-right" richColors />
+          <CommandPalette />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

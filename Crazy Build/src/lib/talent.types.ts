@@ -1,17 +1,6 @@
-export type CandidateRank =
-  | "excellent"
-  | "strong"
-  | "good"
-  | "average"
-  | "not_recommended";
+export type CandidateRank = "excellent" | "strong" | "good" | "average" | "not_recommended";
 
-export type PipelineStage =
-  | "sourced"
-  | "screening"
-  | "interview"
-  | "offer"
-  | "hired"
-  | "rejected";
+export type PipelineStage = "sourced" | "screening" | "interview" | "offer" | "hired" | "rejected";
 
 export interface CandidateSkills {
   programming_languages: string[];
@@ -48,6 +37,7 @@ export interface CandidateSource {
   label: string;
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface TalentCandidate {
   id: string;
   user_id?: string;
@@ -89,7 +79,7 @@ export interface TalentSearchFilters {
 }
 
 export interface ResumeAnalysis {
-  extracted_info: Record<string, unknown>;
+  extracted_info: Record<string, any>;
   summary: string;
   missing_skills: string[];
   job_match_score: number;

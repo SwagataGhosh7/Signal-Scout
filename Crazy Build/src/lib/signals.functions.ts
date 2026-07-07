@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateText } from "ai";
@@ -272,8 +273,9 @@ export const generateOutreach = createServerFn({ method: "POST" })
       model = gateway(MODEL);
     }
 
-    const target = (lead as { targets?: { company_name?: string; industry?: string; domain?: string } })
-      .targets;
+    const target = (
+      lead as { targets?: { company_name?: string; industry?: string; domain?: string } }
+    ).targets;
 
     const prompt = `Write a concise, high-signal cold outreach email for a B2B sales rep.
 
@@ -356,10 +358,25 @@ export const fetchReportData = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ template: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
     const [targetsRes, signalsRes, leadsRes, draftsRes] = await Promise.all([
-      context.supabase.from("targets").select("id, company_name, industry, domain, created_at, last_harvested_at, notes").order("created_at", { ascending: false }),
-      context.supabase.from("signals").select("id, title, summary, signal_type, source, intent, detected_at, target_id").order("detected_at", { ascending: false }).limit(200),
-      context.supabase.from("leads").select("id, title, score, urgency, intent, status, created_at, target_id").order("score", { ascending: false }).limit(200),
-      context.supabase.from("outreach_drafts").select("id, subject, channel, created_at, lead_id").order("created_at", { ascending: false }).limit(200),
+      context.supabase
+        .from("targets")
+        .select("id, company_name, industry, domain, created_at, last_harvested_at, notes")
+        .order("created_at", { ascending: false }),
+      context.supabase
+        .from("signals")
+        .select("id, title, summary, signal_type, source, intent, detected_at, target_id")
+        .order("detected_at", { ascending: false })
+        .limit(200),
+      context.supabase
+        .from("leads")
+        .select("id, title, score, urgency, intent, status, created_at, target_id")
+        .order("score", { ascending: false })
+        .limit(200),
+      context.supabase
+        .from("outreach_drafts")
+        .select("id, subject, channel, created_at, lead_id")
+        .order("created_at", { ascending: false })
+        .limit(200),
     ]);
 
     if (targetsRes.error) throw new Error(targetsRes.error.message);
@@ -385,7 +402,7 @@ export const fetchReportData = createServerFn({ method: "POST" })
       }
     });
 
-    let tableRows: Array<Record<string, unknown>> = [];
+    let tableRows: Array<Record<string, any>> = [];
     switch (data.template) {
       case "Weekly Executive Digest":
         tableRows = signals.slice(0, 20).map((signal) => ({
@@ -579,7 +596,9 @@ export const dashboardStats = createServerFn({ method: "GET" })
       context.supabase.from("outreach_drafts").select("id", { count: "exact", head: true }),
     ]);
     const leads = l.data ?? [];
-    const avgScore = leads.length ? Math.round(leads.reduce((a, b) => a + b.score, 0) / leads.length) : 0;
+    const avgScore = leads.length
+      ? Math.round(leads.reduce((a, b) => a + b.score, 0) / leads.length)
+      : 0;
     const highUrgency = leads.filter((x) => x.urgency === "high").length;
     const byIntent: Record<string, number> = {};
     leads.forEach((x) => {

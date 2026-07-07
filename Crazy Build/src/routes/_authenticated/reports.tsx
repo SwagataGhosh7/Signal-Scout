@@ -20,7 +20,11 @@ import {
   listReports,
   saveReport,
 } from "@/lib/signals.functions";
-import { generateReportFile, type ReportDataSnapshot, type ReportFormat } from "@/lib/report-generator";
+import {
+  generateReportFile,
+  type ReportDataSnapshot,
+  type ReportFormat,
+} from "@/lib/report-generator";
 
 export const Route = createFileRoute("/_authenticated/reports")({
   component: ReportsPage,
@@ -160,11 +164,15 @@ function ReportsPage() {
     try {
       setProgressStep(1);
       setProgressMessage("Collecting signals and lead data");
-      const payload = (await fetchReportDataFn({ template: template.name })) as ReportDataSnapshot;
+      const payload = (await fetchReportDataFn({
+        data: { template: template.name },
+      })) as Omit<ReportDataSnapshot, "summary">;
 
       setProgressStep(2);
       setProgressMessage("Running AI summary");
-      const summaryResponse = (await generateSummaryFn({ payload })) as { summary: string };
+      const summaryResponse = (await generateSummaryFn({ data: { payload } })) as {
+        summary: string;
+      };
 
       setProgressStep(3);
       setProgressMessage("Generating browser file");
@@ -177,13 +185,15 @@ function ReportsPage() {
       setProgressStep(4);
       setProgressMessage("Saving report record");
       const savedReport = (await saveReportFn({
-        title: template.name,
-        report_type: template.type,
-        format,
-        file_name: generatedFile.fileName,
-        file_size: generatedFile.fileSize,
-        download_url: null,
-        status: "ready",
+        data: {
+          title: template.name,
+          report_type: template.type,
+          format,
+          file_name: generatedFile.fileName,
+          file_size: generatedFile.fileSize,
+          download_url: null,
+          status: "ready",
+        },
       })) as GeneratedReport;
 
       setProgressStep(5);
@@ -217,7 +227,7 @@ function ReportsPage() {
           return next;
         });
       }
-      await deleteReportFn({ id });
+      await deleteReportFn({ data: { id } });
       setReports((prev) => prev.filter((report) => report.id !== id));
       toast.success("Report removed from download center.");
     } catch (error) {
@@ -241,7 +251,10 @@ function ReportsPage() {
     toast.success(`Downloading ${report.file_name}`);
   };
 
-  const progressPercent = useMemo(() => Math.round((progressStep / PROGRESS_STEPS.length) * 100), [progressStep]);
+  const progressPercent = useMemo(
+    () => Math.round((progressStep / PROGRESS_STEPS.length) * 100),
+    [progressStep],
+  );
 
   return (
     <div className="space-y-6">
@@ -249,7 +262,8 @@ function ReportsPage() {
         <p className="text-xs uppercase tracking-widest text-primary">Data Exports</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Executive Reports</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Compile live Supabase insights into PDF, CSV, or Excel exports with AI-generated executive summaries.
+          Compile live Supabase insights into PDF, CSV, or Excel exports with AI-generated executive
+          summaries.
         </p>
       </div>
 
@@ -263,7 +277,8 @@ function ReportsPage() {
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 font-medium text-foreground">
               <Sparkles className="h-4 w-4 text-primary" />
-              Six-stage compile pipeline with live data aggregation and browser-side download generation.
+              Six-stage compile pipeline with live data aggregation and browser-side download
+              generation.
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-background">
               <div
@@ -277,12 +292,15 @@ function ReportsPage() {
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
               {PROGRESS_STEPS.map((step, index) => {
-                const isActive = index <= progressStep - 1 || (compilingTemplate && index === progressStep);
+                const isActive =
+                  index <= progressStep - 1 || (compilingTemplate && index === progressStep);
                 return (
                   <div
                     key={step}
                     className={`rounded-md px-2 py-1 text-center text-[10px] font-semibold uppercase tracking-wider ${
-                      isActive ? "bg-primary/15 text-primary" : "bg-background/70 text-muted-foreground"
+                      isActive
+                        ? "bg-primary/15 text-primary"
+                        : "bg-background/70 text-muted-foreground"
                     }`}
                   >
                     {step}
@@ -298,7 +316,10 @@ function ReportsPage() {
               const isCompiling = compilingTemplate === template.name;
 
               return (
-                <div key={template.name} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div
+                  key={template.name}
+                  className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-xs text-foreground">{template.name}</span>
@@ -306,7 +327,9 @@ function ReportsPage() {
                         {template.type}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed max-w-lg">{template.desc}</p>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed max-w-lg">
+                      {template.desc}
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
@@ -314,7 +337,9 @@ function ReportsPage() {
                       {(["PDF", "CSV", "Excel"] as const).map((format) => (
                         <button
                           key={format}
-                          onClick={() => setSelectedFormat((prev) => ({ ...prev, [template.name]: format }))}
+                          onClick={() =>
+                            setSelectedFormat((prev) => ({ ...prev, [template.name]: format }))
+                          }
                           className={`rounded px-2.5 py-1 transition ${
                             currentFormat === format
                               ? "bg-primary/15 text-primary font-semibold"
@@ -331,7 +356,11 @@ function ReportsPage() {
                       disabled={Boolean(compilingTemplate)}
                       className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
                     >
-                      {isCompiling ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                      {isCompiling ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Download className="h-3 w-3" />
+                      )}
                       Compile
                     </button>
                   </div>
@@ -374,7 +403,9 @@ function ReportsPage() {
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="shrink-0">{getFormatIcon(report.format)}</div>
                     <div className="min-w-0">
-                      <h4 className="text-xs font-medium text-foreground truncate">{report.title}</h4>
+                      <h4 className="text-xs font-medium text-foreground truncate">
+                        {report.title}
+                      </h4>
                       <p className="text-[10px] text-muted-foreground mt-0.5">
                         {formatDate(report.created_at)} · {report.file_size}
                       </p>
@@ -405,7 +436,8 @@ function ReportsPage() {
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 text-xs text-muted-foreground flex gap-2">
             <CheckCircle2 className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              Report metadata is persisted in Supabase. Browser-side blobs are kept in memory so downloads stay instant and private.
+              Report metadata is persisted in Supabase. Browser-side blobs are kept in memory so
+              downloads stay instant and private.
             </p>
           </div>
         </div>

@@ -10,7 +10,13 @@ type TiltCardProps = React.HTMLAttributes<HTMLDivElement> & {
   disabled?: boolean;
 };
 
-export function TiltCard({ children, className, intensity = "default", disabled = false, ...props }: TiltCardProps) {
+export function TiltCard({
+  children,
+  className,
+  intensity = "default",
+  disabled = false,
+  ...props
+}: TiltCardProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [active, setActive] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0, glowX: 0, glowY: 0 });
@@ -70,11 +76,12 @@ export function TiltCard({ children, className, intensity = "default", disabled 
     setTilt({ x: 0, y: 0, glowX: 0, glowY: 0 });
   };
 
-  const transform = shouldTilt && active
-    ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translate3d(0, -6px, 0)`
-    : shouldTilt
-      ? `rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)`
-      : "translate3d(0, 0, 0)";
+  const transform =
+    shouldTilt && active
+      ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translate3d(0, -6px, 0)`
+      : shouldTilt
+        ? `rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)`
+        : "translate3d(0, 0, 0)";
 
   return (
     <div
@@ -84,11 +91,13 @@ export function TiltCard({ children, className, intensity = "default", disabled 
       onMouseEnter={() => shouldTilt && setActive(true)}
       onMouseLeave={shouldTilt ? handleLeave : undefined}
       {...props}
-      style={{
-        transform,
-        ["--tilt-glow-x" as string]: `${tilt.glowX}px`,
-        ["--tilt-glow-y" as string]: `${tilt.glowY}px`,
-      } as CSSProperties}
+      style={
+        {
+          transform,
+          ["--tilt-glow-x" as string]: `${tilt.glowX}px`,
+          ["--tilt-glow-y" as string]: `${tilt.glowY}px`,
+        } as CSSProperties
+      }
     >
       {children}
     </div>
@@ -102,7 +111,11 @@ type DepthLayerProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 export function DepthLayer({ children, className, level = "panel", ...props }: DepthLayerProps) {
-  return <div className={cn("depth-layer", `depth-layer--${level}`, className)} {...props}>{children}</div>;
+  return (
+    <div className={cn("depth-layer", `depth-layer--${level}`, className)} {...props}>
+      {children}
+    </div>
+  );
 }
 
 type ParallaxFieldProps = {
@@ -149,10 +162,12 @@ export function ParallaxField({ children, className }: ParallaxFieldProps) {
       className={cn("depth-parallax-field", className)}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      style={{
-        ["--parallax-x" as string]: `${offset.x}px`,
-        ["--parallax-y" as string]: `${offset.y}px`,
-      } as CSSProperties}
+      style={
+        {
+          ["--parallax-x" as string]: `${offset.x}px`,
+          ["--parallax-y" as string]: `${offset.y}px`,
+        } as CSSProperties
+      }
     >
       {children}
     </div>

@@ -19,7 +19,7 @@ export function requireLovableApiKey(): string {
 
   if (!key) {
     throw new Error(
-      "LOVABLE_API_KEY is not configured. Add LOVABLE_API_KEY (or VITE_LOVABLE_API_KEY) to your environment before harvesting signals."
+      "LOVABLE_API_KEY is not configured. Add LOVABLE_API_KEY (or VITE_LOVABLE_API_KEY) to your environment before harvesting signals.",
     );
   }
 

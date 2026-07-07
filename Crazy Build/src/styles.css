@@ -6,7 +6,7 @@
 
 /*
  * Signals Harvesting Engine - Mission Control Design System
- * Dark, tech-forward. Deep space navy + electric cyan + signal violet.
+ * Dual Theme Strategy: "Abyssal Acid" (Dark) & "Frosted Pearl" (Light)
  * All colors in oklch. Semantic tokens only — never hardcode in components.
  */
 
@@ -43,81 +43,94 @@
   --color-warning: var(--warning);
   --color-success: var(--success);
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+  --font-sans: "Albert Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Unbounded", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, monospace;
 
-  --shadow-glow: 0 0 40px -8px oklch(0.72 0.19 210 / 0.35);
-  --shadow-glow-violet: 0 0 40px -8px oklch(0.62 0.24 300 / 0.4);
+  --shadow-glow: 0 0 40px -8px var(--primary);
+  --shadow-glow-violet: 0 0 40px -8px var(--intent);
 }
 
 :root {
   --radius: 0.75rem;
 
-  /* Deep space navy base */
-  --background: oklch(0.16 0.03 260);
-  --foreground: oklch(0.97 0.01 240);
+  /* Frosted Pearl (Light Theme) */
+  --background: oklch(0.98 0.005 250);
+  --foreground: oklch(0.2 0.03 260);
 
-  --card: oklch(0.21 0.035 260);
-  --card-foreground: oklch(0.97 0.01 240);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.03 260);
 
-  --popover: oklch(0.19 0.035 260);
-  --popover-foreground: oklch(0.97 0.01 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.03 260);
 
-  /* Electric cyan primary */
-  --primary: oklch(0.78 0.16 205);
-  --primary-foreground: oklch(0.16 0.03 260);
+  /* Emerald primary */
+  --primary: oklch(0.58 0.15 150);
+  --primary-foreground: oklch(0.98 0.01 240);
 
-  --secondary: oklch(0.28 0.04 260);
-  --secondary-foreground: oklch(0.95 0.01 240);
+  --secondary: oklch(0.94 0.01 250);
+  --secondary-foreground: oklch(0.2 0.03 260);
 
-  --muted: oklch(0.24 0.03 260);
-  --muted-foreground: oklch(0.68 0.02 250);
+  --muted: oklch(0.92 0.01 250);
+  --muted-foreground: oklch(0.5 0.02 260);
 
-  --accent: oklch(0.32 0.08 285);
-  --accent-foreground: oklch(0.97 0.01 240);
+  --accent: oklch(0.94 0.03 285);
+  --accent-foreground: oklch(0.2 0.03 260);
 
-  --destructive: oklch(0.65 0.24 25);
+  --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(0.98 0.01 240);
 
-  --border: oklch(0.3 0.03 260);
-  --input: oklch(0.25 0.03 260);
-  --ring: oklch(0.78 0.16 205);
+  --border: oklch(0.9 0.01 250);
+  --input: oklch(0.9 0.01 250);
+  --ring: oklch(0.58 0.15 150);
 
   /* Signal accents */
-  --signal: oklch(0.78 0.16 205);            /* cyan */
-  --signal-foreground: oklch(0.16 0.03 260);
-  --intent: oklch(0.68 0.22 300);            /* violet for intent */
+  --signal: oklch(0.58 0.15 150);
+  --signal-foreground: oklch(0.98 0.01 240);
+  --intent: oklch(0.5 0.2 300); /* Deep Amethyst */
   --intent-foreground: oklch(0.98 0.01 240);
-  --warning: oklch(0.82 0.17 75);            /* amber */
-  --success: oklch(0.75 0.17 155);           /* green */
+  --warning: oklch(0.7 0.15 75);
+  --success: oklch(0.58 0.15 150);
 }
 
 .dark {
-  --background: oklch(0.16 0.03 260);
-  --foreground: oklch(0.97 0.01 240);
-  --card: oklch(0.21 0.035 260);
-  --card-foreground: oklch(0.97 0.01 240);
-  --popover: oklch(0.19 0.035 260);
-  --popover-foreground: oklch(0.97 0.01 240);
-  --primary: oklch(0.78 0.16 205);
-  --primary-foreground: oklch(0.16 0.03 260);
-  --secondary: oklch(0.28 0.04 260);
-  --secondary-foreground: oklch(0.95 0.01 240);
-  --muted: oklch(0.24 0.03 260);
-  --muted-foreground: oklch(0.68 0.02 250);
-  --accent: oklch(0.32 0.08 285);
-  --accent-foreground: oklch(0.97 0.01 240);
-  --destructive: oklch(0.65 0.24 25);
+  /* Neon Abyss (Enhanced Dark Theme) */
+  --background: oklch(0.11 0.02 280); /* Deep space violet/black */
+  --foreground: oklch(0.98 0.01 280);
+
+  --card: oklch(0.15 0.02 280);
+  --card-foreground: oklch(0.98 0.01 280);
+
+  --popover: oklch(0.13 0.02 280);
+  --popover-foreground: oklch(0.98 0.01 280);
+
+  /* Cyber/Neon Green primary */
+  --primary: oklch(0.82 0.22 140);
+  --primary-foreground: oklch(0.1 0.02 280);
+
+  --secondary: oklch(0.18 0.03 280);
+  --secondary-foreground: oklch(0.98 0.01 280);
+
+  --muted: oklch(0.16 0.02 280);
+  --muted-foreground: oklch(0.65 0.03 280);
+
+  --accent: oklch(0.20 0.04 285);
+  --accent-foreground: oklch(0.98 0.01 280);
+
+  --destructive: oklch(0.60 0.25 15);
   --destructive-foreground: oklch(0.98 0.01 240);
-  --border: oklch(0.3 0.03 260);
-  --input: oklch(0.25 0.03 260);
-  --ring: oklch(0.78 0.16 205);
-  --signal: oklch(0.78 0.16 205);
-  --signal-foreground: oklch(0.16 0.03 260);
-  --intent: oklch(0.68 0.22 300);
-  --intent-foreground: oklch(0.98 0.01 240);
-  --warning: oklch(0.82 0.17 75);
-  --success: oklch(0.75 0.17 155);
+
+  --border: oklch(0.22 0.03 280);
+  --input: oklch(0.18 0.03 280);
+  --ring: oklch(0.82 0.22 140);
+
+  /* Vivid Accents */
+  --signal: oklch(0.82 0.22 140);
+  --signal-foreground: oklch(0.1 0.02 280);
+  --intent: oklch(0.70 0.25 310); /* Electric Pink/Purple */
+  --intent-foreground: oklch(0.98 0.01 280);
+  --warning: oklch(0.85 0.20 80);
+  --success: oklch(0.78 0.20 150);
 }
 
 @layer base {
@@ -129,14 +142,32 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
-  body {
-    background-image:
-      radial-gradient(ellipse 80% 60% at 50% -10%, oklch(0.32 0.12 285 / 0.35), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 90% 20%, oklch(0.4 0.14 205 / 0.2), transparent 60%);
+  .dark body {
+    /* Subtle neon grid and glow for dark mode body */
+    background-image: 
+      radial-gradient(ellipse 70% 50% at 50% -15%, color-mix(in srgb, var(--color-intent) 8%, transparent), transparent 60%),
+      linear-gradient(var(--color-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
     background-attachment: fixed;
-    min-height: 100vh;
   }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+.bg-mesh-light {
+  background-image: 
+    radial-gradient(ellipse 80% 60% at 20% -10%, color-mix(in srgb, var(--primary) 15%, transparent), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, color-mix(in srgb, var(--intent) 10%, transparent), transparent 60%);
+}
+
+.dark .bg-mesh-light {
+  background-image: 
+    radial-gradient(ellipse 80% 60% at 20% -10%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, color-mix(in srgb, var(--intent) 15%, transparent), transparent 60%);
 }
 
 @utility grid-bg {
@@ -155,11 +186,33 @@
 }
 
 @utility text-gradient {
-  background: linear-gradient(135deg, oklch(0.85 0.16 205), oklch(0.72 0.22 300));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-intent));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-reveal-up {
+  opacity: 0;
+  animation: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }

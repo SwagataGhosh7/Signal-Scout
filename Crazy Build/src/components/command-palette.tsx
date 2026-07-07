@@ -14,7 +14,7 @@ import {
   FileText,
   Settings,
   Sparkles,
-  Command as CommandIcon
+  Command as CommandIcon,
 } from "lucide-react";
 import { DepthLayer } from "@/components/depth-system";
 
@@ -47,7 +47,11 @@ export function CommandPalette() {
       className="fixed inset-0 z-50 flex items-start justify-center bg-background/80 p-4 pt-[15vh] backdrop-blur-sm"
       onClick={() => setOpen(false)}
     >
-      <DepthLayer level="floating" className="w-full max-w-lg rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <DepthLayer
+        level="floating"
+        className="w-full max-w-lg rounded-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Command label="Search Command Palette" className="flex flex-col h-[300px]">
           <div className="flex items-center border-b border-border/50 px-3 py-3">
             <Search className="h-4.5 w-4.5 text-muted-foreground mr-2 shrink-0" />
@@ -57,13 +61,16 @@ export function CommandPalette() {
               className="w-full bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground"
             />
           </div>
-          
+
           <Command.List className="flex-1 overflow-y-auto p-2 space-y-1">
             <Command.Empty className="py-6 text-center text-xs text-muted-foreground">
               No results found.
             </Command.Empty>
 
-            <Command.Group heading="Navigation" className="text-[10px] text-muted-foreground uppercase font-mono px-2 py-1.5 font-bold">
+            <Command.Group
+              heading="Navigation"
+              className="text-[10px] text-muted-foreground uppercase font-mono px-2 py-1.5 font-bold"
+            >
               <Command.Item
                 onSelect={() => runCommand(() => navigate({ to: "/app" }))}
                 className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs text-foreground hover:bg-primary/10 hover:text-primary cursor-pointer transition select-none"
@@ -96,7 +103,10 @@ export function CommandPalette() {
               </Command.Item>
             </Command.Group>
 
-            <Command.Group heading="Integrations & Analytics" className="text-[10px] text-muted-foreground uppercase font-mono px-2 py-1.5 font-bold pt-3 border-t border-border/30 mt-2">
+            <Command.Group
+              heading="Integrations & Analytics"
+              className="text-[10px] text-muted-foreground uppercase font-mono px-2 py-1.5 font-bold pt-3 border-t border-border/30 mt-2"
+            >
               <Command.Item
                 onSelect={() => runCommand(() => navigate({ to: "/crm" }))}
                 className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs text-foreground hover:bg-primary/10 hover:text-primary cursor-pointer transition select-none"

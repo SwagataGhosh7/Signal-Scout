@@ -48,7 +48,10 @@ function toDisplayValue(value: unknown) {
   return String(value);
 }
 
-export function generateReportFile(data: ReportDataSnapshot, format: ReportFormat): GeneratedReportFile {
+export function generateReportFile(
+  data: ReportDataSnapshot,
+  format: ReportFormat,
+): GeneratedReportFile {
   const safeTitle = slugify(data.title || "signal-scout-report");
   const fileName = `${safeTitle}.${format.toLowerCase()}`;
 
@@ -102,9 +105,13 @@ function generatePDF(data: ReportDataSnapshot, fileName: string): GeneratedRepor
   const rowData = data.tableRows ?? [];
   if (rowData.length > 0) {
     const headers = Object.keys(rowData[0]).slice(0, 6);
-    const body = rowData.slice(0, 15).map((row) => headers.map((header) => toDisplayValue(row[header])));
+    const body = rowData
+      .slice(0, 15)
+      .map((row) => headers.map((header) => toDisplayValue(row[header])));
     autoTable(doc, {
-      startY: (doc as jsPDF & { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY ? (doc as jsPDF & { lastAutoTable?: { finalY?: number } }).lastAutoTable!.finalY! + 24 : 320,
+      startY: (doc as jsPDF & { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY
+        ? (doc as jsPDF & { lastAutoTable?: { finalY?: number } }).lastAutoTable!.finalY! + 24
+        : 320,
       head: [headers.map((header) => header.replace(/_/g, " "))],
       body,
       theme: "striped",

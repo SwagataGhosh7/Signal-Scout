@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listSignals } from "@/lib/signals.functions";
@@ -20,7 +20,7 @@ import {
   Briefcase,
   Layers,
   ChevronRight,
-  TrendingDown
+  TrendingDown,
 } from "lucide-react";
 import { DepthLayer, TiltCard } from "@/components/depth-system";
 import { Badge, UrgencyBadge } from "./app";
@@ -59,7 +59,7 @@ const SOURCES = [
 function SignalsPage() {
   const fn = useServerFn(listSignals);
   const q = useSuspenseQuery({ queryKey: ["signals"], queryFn: () => fn() });
-  
+
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSource, setSelectedSource] = useState("all");
@@ -69,10 +69,9 @@ function SignalsPage() {
     const matchesSearch =
       s.title.toLowerCase().includes(search.toLowerCase()) ||
       (s.summary && s.summary.toLowerCase().includes(search.toLowerCase()));
-    
-    const matchesCategory =
-      selectedCategory === "all" || s.signal_type === selectedCategory;
-    
+
+    const matchesCategory = selectedCategory === "all" || s.signal_type === selectedCategory;
+
     const matchesSource =
       selectedSource === "all" || (s.source && s.source.toLowerCase() === selectedSource);
 
@@ -82,18 +81,19 @@ function SignalsPage() {
   const selectedSignal = q.data.find((s) => s.id === drawerSignalId);
 
   // Generate detailed fallback parameters for intent analysis if not present in signals
-  const getAnalysisDetails = (sig: typeof q.data[0]) => {
+  const getAnalysisDetails = (sig: (typeof q.data)[0]) => {
     const raw = sig.raw as { urgency?: string; score?: number; rationale?: string } | null;
-    
+
     // Vary based on signal ID for dynamic display
     const score = raw?.score ?? 75;
     const urgency = raw?.urgency ?? "medium";
-    const rationale = raw?.rationale ?? "Target company is scaling rapidly and needs automated support solutions.";
-    
+    const rationale =
+      raw?.rationale ?? "Target company is scaling rapidly and needs automated support solutions.";
+
     // Calculate intent indices
     const isHiring = sig.signal_type === "hiring";
     const isFunding = sig.signal_type === "funding";
-    
+
     return {
       buyingIntent: isFunding ? 92 : isHiring ? 70 : 80,
       hiringIntent: isHiring ? 95 : 55,
@@ -114,10 +114,13 @@ function SignalsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest text-primary font-semibold">Intent analysis agent</p>
+          <p className="text-xs uppercase tracking-widest text-primary font-semibold">
+            Intent analysis agent
+          </p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gradient">Signals Feed</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Monitor real-time company events, buying intent logs, and recommended outbound strategies.
+            Monitor real-time company events, buying intent logs, and recommended outbound
+            strategies.
           </p>
         </div>
       </div>
@@ -143,7 +146,10 @@ function SignalsPage() {
           <div className="flex flex-wrap gap-1.5">
             {SOURCES.map((src) => {
               const active = selectedSource === src;
-              const count = src === "all" ? q.data.length : q.data.filter((s) => s.source && s.source.toLowerCase() === src).length;
+              const count =
+                src === "all"
+                  ? q.data.length
+                  : q.data.filter((s) => s.source && s.source.toLowerCase() === src).length;
               return (
                 <button
                   key={src}
@@ -154,7 +160,8 @@ function SignalsPage() {
                       : "border-border bg-card/50 text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <span className="capitalize">{src}</span> <span className="text-[9px] opacity-70 font-bold font-mono">({count})</span>
+                  <span className="capitalize">{src}</span>{" "}
+                  <span className="text-[9px] opacity-70 font-bold font-mono">({count})</span>
                 </button>
               );
             })}
@@ -169,7 +176,8 @@ function SignalsPage() {
           <div className="flex flex-wrap gap-1.5">
             {CATEGORIES.map((cat) => {
               const active = selectedCategory === cat;
-              const count = cat === "all" ? q.data.length : q.data.filter((s) => s.signal_type === cat).length;
+              const count =
+                cat === "all" ? q.data.length : q.data.filter((s) => s.signal_type === cat).length;
               return (
                 <button
                   key={cat}
@@ -180,7 +188,8 @@ function SignalsPage() {
                       : "border-border bg-card/50 text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <span className="capitalize">{cat.replace("_", " ")}</span> <span className="text-[9px] opacity-70 font-bold font-mono">({count})</span>
+                  <span className="capitalize">{cat.replace("_", " ")}</span>{" "}
+                  <span className="text-[9px] opacity-70 font-bold font-mono">({count})</span>
                 </button>
               );
             })}
@@ -221,10 +230,13 @@ function SignalsPage() {
                           {sig.intent ?? "buying"}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-mono">
-                          {sig.source} · {formatDistanceToNow(new Date(sig.detected_at), { addSuffix: true })}
+                          {sig.source} ·{" "}
+                          {formatDistanceToNow(new Date(sig.detected_at), { addSuffix: true })}
                         </span>
                       </div>
-                      <h4 className="mt-2 text-xs font-semibold text-foreground leading-snug">{sig.title}</h4>
+                      <h4 className="mt-2 text-xs font-semibold text-foreground leading-snug">
+                        {sig.title}
+                      </h4>
                       {sig.summary && (
                         <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-2">
                           {sig.summary}
@@ -241,8 +253,12 @@ function SignalsPage() {
                     </div>
 
                     <div className="text-right shrink-0">
-                      <div className="font-mono text-2xl font-bold text-primary">{analysis.opportunityScore}</div>
-                      <div className="text-[9px] uppercase tracking-widest text-muted-foreground">score</div>
+                      <div className="font-mono text-2xl font-bold text-primary">
+                        {analysis.opportunityScore}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                        score
+                      </div>
                       <div className="mt-1.5">
                         <UrgencyBadge urgency={analysis.urgency} />
                       </div>
@@ -255,9 +271,11 @@ function SignalsPage() {
         </div>
 
         {/* Signal Drawer / Side-panel */}
-        <DepthLayer className={`rounded-2xl p-5 space-y-5 lg:sticky lg:top-6 transition-all duration-300 ${
-          selectedSignal ? "opacity-100 scale-100" : "opacity-50 scale-95 pointer-events-none"
-        }`}>
+        <DepthLayer
+          className={`rounded-2xl p-5 space-y-5 lg:sticky lg:top-6 transition-all duration-300 ${
+            selectedSignal ? "opacity-100 scale-100" : "opacity-50 scale-95 pointer-events-none"
+          }`}
+        >
           {selectedSignal ? (
             (() => {
               const details = getAnalysisDetails(selectedSignal);
@@ -284,12 +302,30 @@ function SignalsPage() {
 
                   {/* Intent score list */}
                   <div className="space-y-2.5">
-                    <h4 className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider">AI Intent Breakdown</h4>
+                    <h4 className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider">
+                      AI Intent Breakdown
+                    </h4>
                     <div className="space-y-2">
-                      <ProgressBar label="Buying Intent" value={details.buyingIntent} color="bg-primary" />
-                      <ProgressBar label="Hiring Intent" value={details.hiringIntent} color="bg-intent" />
-                      <ProgressBar label="Expansion Intent" value={details.expansionIntent} color="bg-warning" />
-                      <ProgressBar label="Partnership Opportunity" value={details.partnershipIntent} color="bg-success" />
+                      <ProgressBar
+                        label="Buying Intent"
+                        value={details.buyingIntent}
+                        color="bg-primary"
+                      />
+                      <ProgressBar
+                        label="Hiring Intent"
+                        value={details.hiringIntent}
+                        color="bg-intent"
+                      />
+                      <ProgressBar
+                        label="Expansion Intent"
+                        value={details.expansionIntent}
+                        color="bg-warning"
+                      />
+                      <ProgressBar
+                        label="Partnership Opportunity"
+                        value={details.partnershipIntent}
+                        color="bg-success"
+                      />
                     </div>
                   </div>
 
@@ -308,9 +344,7 @@ function SignalsPage() {
                       <div className="flex items-center gap-1 text-[10px] text-muted-foreground uppercase font-mono">
                         <UserCheck className="h-3.5 w-3.5 text-primary" /> Decision Maker Persona
                       </div>
-                      <p className="mt-1 text-foreground font-semibold">
-                        {details.persona}
-                      </p>
+                      <p className="mt-1 text-foreground font-semibold">{details.persona}</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3.5 pt-1.5">

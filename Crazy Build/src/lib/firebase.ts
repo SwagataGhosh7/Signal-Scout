@@ -7,7 +7,7 @@ const firebaseConfig = {
   projectId: "signal-scout-31610",
   storageBucket: "signal-scout-31610.firebasestorage.app",
   messagingSenderId: "59596794607",
-  appId: "1:59596794607:web:d987866c0f53edb06c091a"
+  appId: "1:59596794607:web:d987866c0f53edb06c091a",
 };
 
 // Initialize Firebase

@@ -1,6 +1,9 @@
 import type { TalentCandidate } from "./talent.types";
 
-export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_at" | "updated_at">[] = [
+export const SEED_CANDIDATES: Omit<
+  TalentCandidate,
+  "id" | "user_id" | "created_at" | "updated_at"
+>[] = [
   {
     name: "Priya Sharma",
     title: "Senior React Developer",
@@ -28,15 +31,22 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 94,
       skill_match: 92,
-      resume_summary: "Senior frontend engineer with deep React expertise and growing AI integration experience. Strong track record building performant enterprise UIs.",
-      strengths: ["Expert React/TypeScript", "Design systems", "AI-augmented features", "Open source presence"],
+      resume_summary:
+        "Senior frontend engineer with deep React expertise and growing AI integration experience. Strong track record building performant enterprise UIs.",
+      strengths: [
+        "Expert React/TypeScript",
+        "Design systems",
+        "AI-augmented features",
+        "Open source presence",
+      ],
       weaknesses: ["Limited backend depth", "No formal ML research background"],
       recommended_role: "Senior React Developer / Frontend Tech Lead",
       leadership_score: 82,
       technical_score: 91,
       communication_score: 88,
       learning_potential: 90,
-      career_growth_prediction: "Likely to grow into Staff Engineer or Frontend Architect within 2-3 years.",
+      career_growth_prediction:
+        "Likely to grow into Staff Engineer or Frontend Architect within 2-3 years.",
       rank: "excellent",
     },
     pipeline_stage: "interview",
@@ -75,8 +85,14 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 97,
       skill_match: 96,
-      resume_summary: "PhD-level ML engineer specializing in LLM systems, RAG, and production AI pipelines. Published researcher with strong open-source contributions.",
-      strengths: ["Deep LLM expertise", "Production ML systems", "Research background", "Agent architecture"],
+      resume_summary:
+        "PhD-level ML engineer specializing in LLM systems, RAG, and production AI pipelines. Published researcher with strong open-source contributions.",
+      strengths: [
+        "Deep LLM expertise",
+        "Production ML systems",
+        "Research background",
+        "Agent architecture",
+      ],
       weaknesses: ["Less frontend experience", "Prefers research-heavy roles"],
       recommended_role: "Staff LLM Engineer / AI Platform Lead",
       leadership_score: 75,
@@ -121,7 +137,8 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 91,
       skill_match: 89,
-      resume_summary: "Research-focused AI scientist with healthcare domain expertise and published work in clinical NLP and multimodal AI.",
+      resume_summary:
+        "Research-focused AI scientist with healthcare domain expertise and published work in clinical NLP and multimodal AI.",
       strengths: ["Research pedigree", "Domain expertise", "Multimodal AI", "Regulatory awareness"],
       weaknesses: ["Slower to ship product features", "Higher salary expectations"],
       recommended_role: "Senior AI Researcher / Applied Scientist",
@@ -129,7 +146,8 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
       technical_score: 94,
       communication_score: 90,
       learning_potential: 88,
-      career_growth_prediction: "Path to Principal Scientist or Research Director in healthcare AI.",
+      career_growth_prediction:
+        "Path to Principal Scientist or Research Director in healthcare AI.",
       rank: "excellent",
     },
     pipeline_stage: "screening",
@@ -166,8 +184,14 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 86,
       skill_match: 88,
-      resume_summary: "Solid backend engineer with strong Python skills and experience scaling e-commerce systems. Growing AI integration capabilities.",
-      strengths: ["Scalable backend architecture", "API design", "Database optimization", "DevOps fluency"],
+      resume_summary:
+        "Solid backend engineer with strong Python skills and experience scaling e-commerce systems. Growing AI integration capabilities.",
+      strengths: [
+        "Scalable backend architecture",
+        "API design",
+        "Database optimization",
+        "DevOps fluency",
+      ],
       weaknesses: ["Limited AI/ML depth", "No team lead experience"],
       recommended_role: "Senior Python Backend Engineer",
       leadership_score: 65,
@@ -180,7 +204,11 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     pipeline_stage: "sourced",
     sources: [
       { type: "github", url: "https://github.com/jamesokonkwo", label: "GitHub" },
-      { type: "stackoverflow", url: "https://stackoverflow.com/users/jameso", label: "Stack Overflow" },
+      {
+        type: "stackoverflow",
+        url: "https://stackoverflow.com/users/jameso",
+        label: "Stack Overflow",
+      },
     ],
     github_url: "https://github.com/jamesokonkwo",
   },
@@ -211,15 +239,22 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 88,
       skill_match: 91,
-      resume_summary: "Specialized prompt engineer bridging linguistics and data science. Expert at optimizing LLM outputs for business applications.",
-      strengths: ["Prompt engineering mastery", "Evaluation frameworks", "Cross-domain communication", "Fast learner"],
+      resume_summary:
+        "Specialized prompt engineer bridging linguistics and data science. Expert at optimizing LLM outputs for business applications.",
+      strengths: [
+        "Prompt engineering mastery",
+        "Evaluation frameworks",
+        "Cross-domain communication",
+        "Fast learner",
+      ],
       weaknesses: ["Limited systems engineering", "Junior overall experience"],
       recommended_role: "Senior Prompt Engineer / AI Product Specialist",
       leadership_score: 70,
       technical_score: 82,
       communication_score: 95,
       learning_potential: 97,
-      career_growth_prediction: "Fastest learner in pool — likely to become AI Product Lead within 18 months.",
+      career_growth_prediction:
+        "Fastest learner in pool — likely to become AI Product Lead within 18 months.",
       rank: "strong",
     },
     pipeline_stage: "interview",
@@ -256,8 +291,14 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 90,
       skill_match: 87,
-      resume_summary: "Full-stack GenAI engineer combining creative media expertise with production ML pipeline experience.",
-      strengths: ["Multimodal AI", "Full-stack capability", "Creative applications", "Strong portfolio"],
+      resume_summary:
+        "Full-stack GenAI engineer combining creative media expertise with production ML pipeline experience.",
+      strengths: [
+        "Multimodal AI",
+        "Full-stack capability",
+        "Creative applications",
+        "Strong portfolio",
+      ],
       weaknesses: ["Less enterprise experience", "Infrastructure depth"],
       recommended_role: "GenAI Engineer / AI Product Engineer",
       leadership_score: 72,
@@ -302,7 +343,8 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 72,
       skill_match: 70,
-      resume_summary: "Competent full-stack developer with EdTech experience. Generalist profile with emerging AI interest.",
+      resume_summary:
+        "Competent full-stack developer with EdTech experience. Generalist profile with emerging AI interest.",
       strengths: ["Versatile stack", "EdTech domain knowledge", "Immediate availability"],
       weaknesses: ["Limited AI depth", "No senior-level projects", "Minimal open source"],
       recommended_role: "Mid-level Full Stack Developer",
@@ -343,15 +385,22 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 78,
       skill_match: 75,
-      resume_summary: "Veteran DevOps/SRE engineer with extensive cloud and Kubernetes expertise. Most experienced candidate in infrastructure.",
-      strengths: ["Infrastructure mastery", "Certifications", "SRE best practices", "Most experienced"],
+      resume_summary:
+        "Veteran DevOps/SRE engineer with extensive cloud and Kubernetes expertise. Most experienced candidate in infrastructure.",
+      strengths: [
+        "Infrastructure mastery",
+        "Certifications",
+        "SRE best practices",
+        "Most experienced",
+      ],
       weaknesses: ["Not a software engineer", "Limited application development"],
       recommended_role: "Senior DevOps / Platform Engineer",
       leadership_score: 85,
       technical_score: 86,
       communication_score: 78,
       learning_potential: 70,
-      career_growth_prediction: "Future leader track — Platform Engineering Manager or Director of SRE.",
+      career_growth_prediction:
+        "Future leader track — Platform Engineering Manager or Director of SRE.",
       rank: "strong",
     },
     pipeline_stage: "screening",
@@ -388,9 +437,15 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 45,
       skill_match: 42,
-      resume_summary: "Entry-level React developer with bootcamp background. Shows potential but lacks production experience for senior roles.",
+      resume_summary:
+        "Entry-level React developer with bootcamp background. Shows potential but lacks production experience for senior roles.",
       strengths: ["UX awareness", "Motivation", "Modern CSS skills"],
-      weaknesses: ["Very junior", "No production experience", "No backend skills", "No AI experience"],
+      weaknesses: [
+        "Very junior",
+        "No production experience",
+        "No backend skills",
+        "No AI experience",
+      ],
       recommended_role: "Junior Frontend Developer (with mentorship)",
       leadership_score: 30,
       technical_score: 48,
@@ -429,8 +484,14 @@ export const SEED_CANDIDATES: Omit<TalentCandidate, "id" | "user_id" | "created_
     analysis: {
       ai_match_score: 89,
       skill_match: 85,
-      resume_summary: "Staff-level engineer with deep distributed systems expertise. Highest AI score among senior generalists with leadership potential.",
-      strengths: ["System design", "Scale experience", "Technical leadership", "Highest experience"],
+      resume_summary:
+        "Staff-level engineer with deep distributed systems expertise. Highest AI score among senior generalists with leadership potential.",
+      strengths: [
+        "System design",
+        "Scale experience",
+        "Technical leadership",
+        "Highest experience",
+      ],
       weaknesses: ["Not AI-specialist", "EU timezone", "Premium compensation"],
       recommended_role: "Staff Engineer / Engineering Manager",
       leadership_score: 92,

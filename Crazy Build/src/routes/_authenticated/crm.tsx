@@ -15,7 +15,7 @@ import {
   Circle,
   PlusCircle,
   RefreshCw,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { Badge, UrgencyBadge } from "./app";
 
@@ -24,18 +24,60 @@ export const Route = createFileRoute("/_authenticated/crm")({
 });
 
 const CONNECTORS = [
-  { name: "HubSpot", id: "hubspot", desc: "Sync contacts, deals, and notes directly to your HubSpot pipeline.", color: "text-[#FF7A59]", logo: Building2 },
-  { name: "Salesforce", id: "salesforce", desc: "Automate lead mapping and contact records inside Salesforce CRM.", color: "text-[#00A4EF]", logo: Database },
-  { name: "Zoho CRM", id: "zoho", desc: "Push signals directly into Zoho deals module and set up follow-up alerts.", color: "text-[#E21A22]", logo: ArrowRightLeft },
-  { name: "Pipedrive", id: "pipedrive", desc: "Sync targeted buyer personas to your active pipelines.", color: "text-[#00B46A]", logo: TrendingUp },
-  { name: "Freshsales", id: "freshsales", desc: "Automate outbound outreach mapping to Freshsales deals.", color: "text-[#183247]", logo: RefreshCw },
+  {
+    name: "HubSpot",
+    id: "hubspot",
+    desc: "Sync contacts, deals, and notes directly to your HubSpot pipeline.",
+    color: "text-[#FF7A59]",
+    logo: Building2,
+  },
+  {
+    name: "Salesforce",
+    id: "salesforce",
+    desc: "Automate lead mapping and contact records inside Salesforce CRM.",
+    color: "text-[#00A4EF]",
+    logo: Database,
+  },
+  {
+    name: "Zoho CRM",
+    id: "zoho",
+    desc: "Push signals directly into Zoho deals module and set up follow-up alerts.",
+    color: "text-[#E21A22]",
+    logo: ArrowRightLeft,
+  },
+  {
+    name: "Pipedrive",
+    id: "pipedrive",
+    desc: "Sync targeted buyer personas to your active pipelines.",
+    color: "text-[#00B46A]",
+    logo: TrendingUp,
+  },
+  {
+    name: "Freshsales",
+    id: "freshsales",
+    desc: "Automate outbound outreach mapping to Freshsales deals.",
+    color: "text-[#183247]",
+    logo: RefreshCw,
+  },
 ];
 
 const CRM_STAGES = [
   { label: "New Leads", key: "new", color: "border-sky-500/20 bg-sky-500/5 text-sky-400" },
-  { label: "Contacted", key: "contacted", color: "border-amber-500/20 bg-amber-500/5 text-amber-400" },
-  { label: "Qualified", key: "qualified", color: "border-violet-500/20 bg-violet-500/5 text-violet-400" },
-  { label: "Deals Won", key: "won", color: "border-emerald-500/20 bg-emerald-500/5 text-emerald-400" },
+  {
+    label: "Contacted",
+    key: "contacted",
+    color: "border-amber-500/20 bg-amber-500/5 text-amber-400",
+  },
+  {
+    label: "Qualified",
+    key: "qualified",
+    color: "border-violet-500/20 bg-violet-500/5 text-violet-400",
+  },
+  {
+    label: "Deals Won",
+    key: "won",
+    color: "border-emerald-500/20 bg-emerald-500/5 text-emerald-400",
+  },
   { label: "Lost", key: "lost", color: "border-rose-500/20 bg-rose-500/5 text-rose-400" },
 ] as const;
 
@@ -149,7 +191,10 @@ function CrmPage() {
             const totalDealValue = stageLeads.reduce((acc, curr) => acc + curr.score * 150, 0);
 
             return (
-              <div key={stage.key} className="flex flex-col min-w-[220px] rounded-2xl border border-border/60 bg-card/20 p-4">
+              <div
+                key={stage.key}
+                className="flex flex-col min-w-[220px] rounded-2xl border border-border/60 bg-card/20 p-4"
+              >
                 {/* Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-border/40 mb-3">
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -229,7 +274,9 @@ function CrmPage() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className={`grid h-9 w-9 place-items-center rounded-lg bg-card border border-border/80 ${c.color}`}>
+                      <div
+                        className={`grid h-9 w-9 place-items-center rounded-lg bg-card border border-border/80 ${c.color}`}
+                      >
                         <c.logo className="h-5 w-5" />
                       </div>
                       <span className="font-semibold text-foreground">{c.name}</span>
@@ -244,9 +291,7 @@ function CrmPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {c.desc}
-                  </p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{c.desc}</p>
                 </div>
                 <div className="mt-6 flex gap-2">
                   <button

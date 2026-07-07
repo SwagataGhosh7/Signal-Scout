@@ -2,7 +2,10 @@ import Papa from "papaparse";
 import { generateReportFile, type ReportDataSnapshot } from "@/lib/report-generator";
 import type { TalentCandidate } from "@/lib/talent.types";
 
-export function buildTalentReport(candidates: TalentCandidate[], title: string): ReportDataSnapshot {
+export function buildTalentReport(
+  candidates: TalentCandidate[],
+  title: string,
+): ReportDataSnapshot {
   const avgScore = candidates.length
     ? Math.round(candidates.reduce((s, c) => s + c.analysis.ai_match_score, 0) / candidates.length)
     : 0;
@@ -48,7 +51,11 @@ export function exportTalentCSV(candidates: TalentCandidate[], fileName = "talen
   downloadBlob(new Blob([csv], { type: "text/csv" }), `${fileName}.csv`);
 }
 
-export function exportTalentReport(candidates: TalentCandidate[], format: "PDF" | "CSV" | "Excel", title: string) {
+export function exportTalentReport(
+  candidates: TalentCandidate[],
+  format: "PDF" | "CSV" | "Excel",
+  title: string,
+) {
   const snapshot = buildTalentReport(candidates, title);
   const file = generateReportFile(snapshot, format);
   downloadBlob(file.blob, file.fileName);

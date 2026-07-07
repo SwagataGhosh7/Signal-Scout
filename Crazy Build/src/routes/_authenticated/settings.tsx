@@ -11,7 +11,7 @@ import {
   Activity,
   Save,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { Badge } from "./app";
 
@@ -58,7 +58,9 @@ function SettingsPage() {
     setSavingKeys(true);
     setTimeout(() => {
       setSavingKeys(false);
-      toast.success("API keys updated", { description: "Agent swarms will now query updated models." });
+      toast.success("API keys updated", {
+        description: "Agent swarms will now query updated models.",
+      });
     }, 800);
   };
 
@@ -67,7 +69,9 @@ function SettingsPage() {
     setSavingEmail(true);
     setTimeout(() => {
       setSavingEmail(false);
-      toast.success("Email configuration saved", { description: "Ready to send outbound draft requests." });
+      toast.success("Email configuration saved", {
+        description: "Ready to send outbound draft requests.",
+      });
     }, 800);
   };
 
@@ -91,7 +95,8 @@ function SettingsPage() {
         <p className="text-xs uppercase tracking-widest text-primary">System Config</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Project Settings</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage API credentials, configure outbound email channels, webhooks, and alert preferences.
+          Manage API credentials, configure outbound email channels, webhooks, and alert
+          preferences.
         </p>
       </div>
 
@@ -105,7 +110,9 @@ function SettingsPage() {
 
           <form onSubmit={handleSaveKeys} className="space-y-3">
             <div>
-              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Gemini Pro/Flash API Key</label>
+              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                Gemini Pro/Flash API Key
+              </label>
               <input
                 type="password"
                 value={keys.gemini}
@@ -115,7 +122,9 @@ function SettingsPage() {
             </div>
 
             <div>
-              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Groq API Key</label>
+              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                Groq API Key
+              </label>
               <input
                 type="password"
                 value={keys.groq}
@@ -125,7 +134,9 @@ function SettingsPage() {
             </div>
 
             <div>
-              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">OpenAI Compatible API Key</label>
+              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                OpenAI Compatible API Key
+              </label>
               <input
                 type="password"
                 value={keys.openai}
@@ -135,7 +146,9 @@ function SettingsPage() {
             </div>
 
             <div>
-              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Supabase Endpoint URL</label>
+              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                Supabase Endpoint URL
+              </label>
               <input
                 type="text"
                 disabled
@@ -146,7 +159,8 @@ function SettingsPage() {
 
             <div className="flex justify-between items-center pt-2">
               <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <AlertCircle className="h-3.5 w-3.5 text-warning" /> Credentials stored in secure local environment
+                <AlertCircle className="h-3.5 w-3.5 text-warning" /> Credentials stored in secure
+                local environment
               </span>
               <button
                 type="submit"
@@ -169,7 +183,9 @@ function SettingsPage() {
 
           <form onSubmit={handleSaveEmail} className="space-y-3">
             <div>
-              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Provider Type</label>
+              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                Provider Type
+              </label>
               <select
                 value={emailConfig.provider}
                 onChange={(e) => setEmailConfig({ ...emailConfig, provider: e.target.value })}
@@ -183,7 +199,9 @@ function SettingsPage() {
 
             <div className="grid grid-cols-3 gap-2">
               <div className="col-span-2">
-                <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Host Server</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                  Host Server
+                </label>
                 <input
                   type="text"
                   value={emailConfig.host}
@@ -192,7 +210,9 @@ function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Port</label>
+                <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                  Port
+                </label>
                 <input
                   type="text"
                   value={emailConfig.port}
@@ -203,7 +223,9 @@ function SettingsPage() {
             </div>
 
             <div>
-              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Sender Mask (From Header)</label>
+              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                Sender Mask (From Header)
+              </label>
               <input
                 type="text"
                 value={emailConfig.sender}
@@ -237,7 +259,9 @@ function SettingsPage() {
 
           <form onSubmit={handleSaveWebhooks} className="space-y-3">
             <div>
-              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Slack Channel Webhook (Slack Alerts)</label>
+              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                Slack Channel Webhook (Slack Alerts)
+              </label>
               <input
                 type="text"
                 value={webhooks.slack}
@@ -247,7 +271,9 @@ function SettingsPage() {
             </div>
 
             <div>
-              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Leads Outflow Hook Endpoint</label>
+              <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                Leads Outflow Hook Endpoint
+              </label>
               <input
                 type="text"
                 value={webhooks.leads}
@@ -264,7 +290,9 @@ function SettingsPage() {
                   checked={webhooks.active}
                   onChange={(e) => setWebhooks({ ...webhooks, active: e.target.checked })}
                 />
-                <label htmlFor="hook-state" className="text-muted-foreground">Webhooks are active</label>
+                <label htmlFor="hook-state" className="text-muted-foreground">
+                  Webhooks are active
+                </label>
               </div>
               <button
                 type="submit"
@@ -303,7 +331,9 @@ function SettingsPage() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-xs font-medium text-foreground">Immediate alert on Hot Leads</h4>
+                <h4 className="text-xs font-medium text-foreground">
+                  Immediate alert on Hot Leads
+                </h4>
                 <p className="text-[10px] text-muted-foreground leading-relaxed">
                   Email when AI detects a critical-urgency signal with score exceeding 85.
                 </p>

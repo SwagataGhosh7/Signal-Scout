@@ -64,7 +64,8 @@ const candidatePool = [
     scoreLabel: "Excellent",
     experience: "6 yrs",
     skills: ["Python", "PyTorch", "RAG", "LangChain"],
-    summary: "Built production retrieval pipelines and evaluation harnesses for enterprise copilots.",
+    summary:
+      "Built production retrieval pipelines and evaluation harnesses for enterprise copilots.",
   },
   {
     id: 3,
@@ -86,11 +87,13 @@ const recommendationCards = [
   },
   {
     title: "Fastest Learner",
-    detail: "Sofia Alvarez shows rapid model experimentation velocity and strong mentorship signals.",
+    detail:
+      "Sofia Alvarez shows rapid model experimentation velocity and strong mentorship signals.",
   },
   {
     title: "Future Leader",
-    detail: "Daniel Kim combines deep LLM systems knowledge with strong cross-functional influence.",
+    detail:
+      "Daniel Kim combines deep LLM systems knowledge with strong cross-functional influence.",
   },
 ];
 
@@ -111,9 +114,21 @@ const readinessProfile = [
 ];
 
 const interviewQuestions = [
-  { type: "Technical", question: "Design a retrieval layer that keeps LLM answers grounded with real-time product data." },
-  { type: "Behavioral", question: "Describe how you handled a difficult cross-functional launch with unclear ownership." },
-  { type: "LLM", question: "How would you evaluate prompt quality, hallucination rate, and tool-call reliability?" },
+  {
+    type: "Technical",
+    question:
+      "Design a retrieval layer that keeps LLM answers grounded with real-time product data.",
+  },
+  {
+    type: "Behavioral",
+    question:
+      "Describe how you handled a difficult cross-functional launch with unclear ownership.",
+  },
+  {
+    type: "LLM",
+    question:
+      "How would you evaluate prompt quality, hallucination rate, and tool-call reliability?",
+  },
 ];
 
 const hiringTrend = [
@@ -128,10 +143,15 @@ function HiringPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-primary">Enterprise Talent Intelligence</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">AI Talent Intelligence & Hiring Agent</h1>
+          <p className="text-xs uppercase tracking-[0.3em] text-primary">
+            Enterprise Talent Intelligence
+          </p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+            AI Talent Intelligence & Hiring Agent
+          </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Discover, evaluate, and prioritize elite candidates with authorized data sources, Gemini 3 Flash scoring, and recruiter-ready interview plans.
+            Discover, evaluate, and prioritize elite candidates with authorized data sources, Gemini
+            3 Flash scoring, and recruiter-ready interview plans.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-border bg-card/60 px-3.5 py-2 text-xs text-muted-foreground">
@@ -141,10 +161,34 @@ function HiringPage() {
       </div>
 
       <div className="grid gap-3 md:grid-cols-4">
-        <MetricCard title="Candidates Reviewed" value="128" hint="+18 this week" icon={Users} accent="text-primary" />
-        <MetricCard title="Average Match Score" value="91.4" hint="Across active roles" icon={TrendingUp} accent="text-success" />
-        <MetricCard title="Top Skills" value="LLMs / React" hint="Most in-demand" icon={Brain} accent="text-intent" />
-        <MetricCard title="Hiring Funnel" value="31" hint="Shortlisted this month" icon={Briefcase} accent="text-warning" />
+        <MetricCard
+          title="Candidates Reviewed"
+          value="128"
+          hint="+18 this week"
+          icon={Users}
+          accent="text-primary"
+        />
+        <MetricCard
+          title="Average Match Score"
+          value="91.4"
+          hint="Across active roles"
+          icon={TrendingUp}
+          accent="text-success"
+        />
+        <MetricCard
+          title="Top Skills"
+          value="LLMs / React"
+          hint="Most in-demand"
+          icon={Brain}
+          accent="text-intent"
+        />
+        <MetricCard
+          title="Hiring Funnel"
+          value="31"
+          hint="Shortlisted this month"
+          icon={Briefcase}
+          accent="text-warning"
+        />
       </div>
 
       <ParallaxField className="space-y-6">
@@ -152,22 +196,21 @@ function HiringPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h2 className="text-sm font-semibold">AI Talent Search</h2>
-              <p className="text-xs text-muted-foreground">Run role-aware talent queries with skills, experience, salary, and location filters.</p>
+              <p className="text-xs text-muted-foreground">
+                Run role-aware talent queries with skills, experience, salary, and location filters.
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {[
-                "Senior React Developer",
-                "LLM Engineer",
-                "AI Researcher",
-                "Prompt Engineer",
-              ].map((query) => (
-                <button
-                  key={query}
-                  className="rounded-full border border-border bg-background/50 px-3 py-1 text-[11px] text-muted-foreground transition hover:bg-accent"
-                >
-                  {query}
-                </button>
-              ))}
+              {["Senior React Developer", "LLM Engineer", "AI Researcher", "Prompt Engineer"].map(
+                (query) => (
+                  <button
+                    key={query}
+                    className="rounded-full border border-border bg-background/50 px-3 py-1 text-[11px] text-muted-foreground transition hover:bg-accent"
+                  >
+                    {query}
+                  </button>
+                ),
+              )}
             </div>
           </div>
 
@@ -194,7 +237,9 @@ function HiringPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold">Candidate Pipeline</h2>
-                <p className="text-xs text-muted-foreground">Ranked candidates with AI match scoring, skill fit, and growth potential.</p>
+                <p className="text-xs text-muted-foreground">
+                  Ranked candidates with AI match scoring, skill fit, and growth potential.
+                </p>
               </div>
               <div className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
                 Top 10 Ranked
@@ -203,7 +248,11 @@ function HiringPage() {
 
             <div className="space-y-3">
               {candidatePool.map((candidate) => (
-                <TiltCard key={candidate.id} intensity="dense" className="rounded-2xl border border-border/60 bg-background/40 p-4">
+                <TiltCard
+                  key={candidate.id}
+                  intensity="dense"
+                  className="rounded-2xl border border-border/60 bg-background/40 p-4"
+                >
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <div>
                       <div className="flex items-center gap-2">
@@ -214,14 +263,27 @@ function HiringPage() {
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{candidate.role}</p>
                       <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
-                        <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{candidate.location}</span>
-                        <span className="flex items-center gap-1"><Clock3 className="h-3 w-3" />{candidate.experience}</span>
-                        <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" />$185k</span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {candidate.location}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock3 className="h-3 w-3" />
+                          {candidate.experience}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <DollarSign className="h-3 w-3" />
+                          $185k
+                        </span>
                       </div>
                     </div>
                     <div className="rounded-xl border border-border/70 bg-card/60 px-3 py-2 text-right">
-                      <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">AI Match</div>
-                      <div className="font-mono text-xl font-semibold text-primary">{candidate.match}</div>
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                        AI Match
+                      </div>
+                      <div className="font-mono text-xl font-semibold text-primary">
+                        {candidate.match}
+                      </div>
                     </div>
                   </div>
 
@@ -229,7 +291,10 @@ function HiringPage() {
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     {candidate.skills.map((skill) => (
-                      <span key={skill} className="rounded-full border border-border/70 bg-background/60 px-2.5 py-1 text-[10px] text-foreground">
+                      <span
+                        key={skill}
+                        className="rounded-full border border-border/70 bg-background/60 px-2.5 py-1 text-[10px] text-foreground"
+                      >
                         {skill}
                       </span>
                     ))}
@@ -243,13 +308,18 @@ function HiringPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold">AI Recommendations</h2>
-                <p className="text-xs text-muted-foreground">Signals that matter when recruiters decide who to advance.</p>
+                <p className="text-xs text-muted-foreground">
+                  Signals that matter when recruiters decide who to advance.
+                </p>
               </div>
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div className="space-y-3">
               {recommendationCards.map((card) => (
-                <div key={card.title} className="rounded-xl border border-border/70 bg-background/50 p-3">
+                <div
+                  key={card.title}
+                  className="rounded-xl border border-border/70 bg-background/50 p-3"
+                >
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <CheckCircle2 className="h-4 w-4 text-success" />
                     {card.title}
@@ -263,7 +333,10 @@ function HiringPage() {
                 <Zap className="h-4 w-4 text-primary" />
                 Suggested action
               </div>
-              <p className="mt-2">Schedule interviews with Maya and Daniel this afternoon and prepare a structured LLM evaluation kit.</p>
+              <p className="mt-2">
+                Schedule interviews with Maya and Daniel this afternoon and prepare a structured LLM
+                evaluation kit.
+              </p>
             </div>
           </DepthLayer>
         </div>
@@ -273,7 +346,9 @@ function HiringPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold">Resume Intelligence</h2>
-                <p className="text-xs text-muted-foreground">Upload a PDF or DOCX to extract, summarize, and compare against the role.</p>
+                <p className="text-xs text-muted-foreground">
+                  Upload a PDF or DOCX to extract, summarize, and compare against the role.
+                </p>
               </div>
               <button className="rounded-full border border-border bg-background/50 px-3 py-1 text-[11px] text-muted-foreground transition hover:bg-accent">
                 Upload Resume
@@ -287,12 +362,22 @@ function HiringPage() {
 
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-xl border border-border/70 bg-background/50 p-3">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Summary</div>
-                <p className="mt-2 text-sm text-foreground">Strong product engineering profile with leadership, stable delivery history, and proven ML experimentation.</p>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Summary
+                </div>
+                <p className="mt-2 text-sm text-foreground">
+                  Strong product engineering profile with leadership, stable delivery history, and
+                  proven ML experimentation.
+                </p>
               </div>
               <div className="rounded-xl border border-border/70 bg-background/50 p-3">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Missing Skills</div>
-                <p className="mt-2 text-sm text-foreground">Fine-tune on distributed systems, search ranking, and enterprise deployment experience.</p>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Missing Skills
+                </div>
+                <p className="mt-2 text-sm text-foreground">
+                  Fine-tune on distributed systems, search ranking, and enterprise deployment
+                  experience.
+                </p>
               </div>
             </div>
           </DepthLayer>
@@ -301,14 +386,21 @@ function HiringPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold">Interview Assistant</h2>
-                <p className="text-xs text-muted-foreground">Generate technical, behavioral, and LLM-specific questions instantly.</p>
+                <p className="text-xs text-muted-foreground">
+                  Generate technical, behavioral, and LLM-specific questions instantly.
+                </p>
               </div>
               <MessageSquare className="h-4 w-4 text-primary" />
             </div>
             <div className="space-y-2">
               {interviewQuestions.map((item) => (
-                <div key={item.type} className="rounded-xl border border-border/70 bg-background/50 p-3">
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{item.type}</div>
+                <div
+                  key={item.type}
+                  className="rounded-xl border border-border/70 bg-background/50 p-3"
+                >
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {item.type}
+                  </div>
                   <p className="mt-2 text-sm text-foreground">{item.question}</p>
                 </div>
               ))}
@@ -321,7 +413,9 @@ function HiringPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold">Hiring Analytics</h2>
-                <p className="text-xs text-muted-foreground">Monitor candidate volume, shortlist velocity, and skill demand over time.</p>
+                <p className="text-xs text-muted-foreground">
+                  Monitor candidate volume, shortlist velocity, and skill demand over time.
+                </p>
               </div>
               <Download className="h-4 w-4 text-muted-foreground" />
             </div>
@@ -331,8 +425,18 @@ function HiringPage() {
                   <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={10} />
                   <YAxis stroke="rgba(255,255,255,0.4)" fontSize={10} />
                   <Tooltip />
-                  <Area type="monotone" dataKey="reviewed" stroke="var(--primary)" fill="rgba(99,102,241,0.18)" />
-                  <Area type="monotone" dataKey="shortlisted" stroke="var(--success)" fill="rgba(16,185,129,0.16)" />
+                  <Area
+                    type="monotone"
+                    dataKey="reviewed"
+                    stroke="var(--primary)"
+                    fill="rgba(99,102,241,0.18)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="shortlisted"
+                    stroke="var(--success)"
+                    fill="rgba(16,185,129,0.16)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -342,7 +446,9 @@ function HiringPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold">Skills Intelligence</h2>
-                <p className="text-xs text-muted-foreground">A quick view of the strongest emerging skill clusters.</p>
+                <p className="text-xs text-muted-foreground">
+                  A quick view of the strongest emerging skill clusters.
+                </p>
               </div>
               <GraduationCap className="h-4 w-4 text-primary" />
             </div>
@@ -357,12 +463,17 @@ function HiringPage() {
               </ResponsiveContainer>
             </div>
             <div className="rounded-xl border border-border/70 bg-background/50 p-3">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Readiness Profile</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Readiness Profile
+              </div>
               <div className="mt-3 h-40">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={readinessProfile}>
                     <PolarGrid stroke="rgba(255,255,255,0.12)" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.7)" }} />
+                    <PolarAngleAxis
+                      dataKey="subject"
+                      tick={{ fontSize: 10, fill: "rgba(255,255,255,0.7)" }}
+                    />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
                     <Radar dataKey="score" stroke="var(--primary)" fill="rgba(99,102,241,0.25)" />
                   </RadarChart>
@@ -376,7 +487,10 @@ function HiringPage() {
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h2 className="text-sm font-semibold">AI Copilot</h2>
-              <p className="text-xs text-muted-foreground">Ask the recruiter assistant for ranking, comparisons, interview plans, or resume summaries.</p>
+              <p className="text-xs text-muted-foreground">
+                Ask the recruiter assistant for ranking, comparisons, interview plans, or resume
+                summaries.
+              </p>
             </div>
             <div className="rounded-full border border-border bg-background/50 px-3 py-1 text-[11px] text-muted-foreground">
               Example prompts: “Find the best LLM Engineer”
@@ -390,15 +504,23 @@ function HiringPage() {
                 "Generate interview questions",
                 "Summarize this resume",
               ].map((prompt) => (
-                <button key={prompt} className="flex w-full items-center justify-between rounded-xl border border-border/70 bg-background/50 px-3 py-2 text-left text-sm text-foreground transition hover:bg-accent">
+                <button
+                  key={prompt}
+                  className="flex w-full items-center justify-between rounded-xl border border-border/70 bg-background/50 px-3 py-2 text-left text-sm text-foreground transition hover:bg-accent"
+                >
                   <span>{prompt}</span>
                   <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
                 </button>
               ))}
             </div>
             <div className="rounded-xl border border-primary/20 bg-primary/10 p-4">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Current Recommendation</div>
-              <p className="mt-2 text-sm text-foreground">Maya Patel is the best fit for the hiring mandate based on React leadership, strong AI product experience, and strong communication signals.</p>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Current Recommendation
+              </div>
+              <p className="mt-2 text-sm text-foreground">
+                Maya Patel is the best fit for the hiring mandate based on React leadership, strong
+                AI product experience, and strong communication signals.
+              </p>
             </div>
           </div>
         </DepthLayer>
@@ -423,7 +545,9 @@ function MetricCard({
   return (
     <TiltCard intensity="dense" className="rounded-2xl border border-border/60 bg-card/50 p-4">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          {title}
+        </span>
         <div className={`rounded-lg bg-background/60 p-2 ${accent}`}>
           <Icon className="h-4 w-4" />
         </div>

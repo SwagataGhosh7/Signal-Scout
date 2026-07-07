@@ -83,12 +83,31 @@ function AnalyticsPage() {
     Array.from({ length: 12 }, (_, hour) => {
       // simulate random densities
       const base = (day * 3 + hour * 2) % 10;
-      return base > 7 ? "bg-primary/90 text-primary-foreground" : base > 4 ? "bg-primary/50 text-primary-foreground" : base > 2 ? "bg-primary/20" : "bg-muted/10";
-    })
+      return base > 7
+        ? "bg-primary/90 text-primary-foreground"
+        : base > 4
+          ? "bg-primary/50 text-primary-foreground"
+          : base > 2
+            ? "bg-primary/20"
+            : "bg-muted/10";
+    }),
   );
 
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const hours = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM"];
+  const hours = [
+    "9AM",
+    "10AM",
+    "11AM",
+    "12PM",
+    "1PM",
+    "2PM",
+    "3PM",
+    "4PM",
+    "5PM",
+    "6PM",
+    "7PM",
+    "8PM",
+  ];
 
   return (
     <div className="space-y-6">
@@ -119,7 +138,9 @@ function AnalyticsPage() {
               +2.3% <ArrowUpRight className="h-2.5 w-2.5" />
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-muted-foreground">Ratio of Scans to Qualified Leads</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Ratio of Scans to Qualified Leads
+          </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card/50 p-4">
@@ -133,7 +154,9 @@ function AnalyticsPage() {
               -1.1d <ArrowUpRight className="h-2.5 w-2.5" />
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-muted-foreground">Time from Signal to Outreach draft</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Time from Signal to Outreach draft
+          </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card/50 p-4">
@@ -142,12 +165,16 @@ function AnalyticsPage() {
             <Zap className="h-4 w-4 text-intent" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-mono text-3xl font-bold">${((s?.leads ?? 12) * 1500).toLocaleString()}</span>
+            <span className="font-mono text-3xl font-bold">
+              ${((s?.leads ?? 12) * 1500).toLocaleString()}
+            </span>
             <span className="text-[10px] text-primary font-mono font-semibold flex items-center">
               +14% <ArrowUpRight className="h-2.5 w-2.5" />
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-muted-foreground">Est. B2B deal size from priority scores</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Est. B2B deal size from priority scores
+          </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card/50 p-4">
@@ -171,13 +198,18 @@ function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-semibold text-sm">Harvested Signal Volumes</h2>
-              <p className="text-xs text-muted-foreground">Volume counts grouped by channel sources</p>
+              <p className="text-xs text-muted-foreground">
+                Volume counts grouped by channel sources
+              </p>
             </div>
             <Badge>Active</Badge>
           </div>
           <div className="h-[260px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={SIGNAL_TREND_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart
+                data={SIGNAL_TREND_DATA}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="colorLk" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
@@ -191,10 +223,28 @@ function AnalyticsPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="date" stroke="rgba(255,255,255,0.4)" fontSize={10} />
                 <YAxis stroke="rgba(255,255,255,0.4)" fontSize={10} />
-                <Tooltip contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", color: "#fff" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "var(--card)",
+                    borderColor: "var(--border)",
+                    color: "#fff",
+                  }}
+                />
                 <Legend iconSize={8} wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
-                <Area type="monotone" dataKey="LinkedIn" stroke="var(--primary)" fillOpacity={1} fill="url(#colorLk)" />
-                <Area type="monotone" dataKey="Jobs" stroke="var(--intent)" fillOpacity={1} fill="url(#colorTw)" />
+                <Area
+                  type="monotone"
+                  dataKey="LinkedIn"
+                  stroke="var(--primary)"
+                  fillOpacity={1}
+                  fill="url(#colorLk)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Jobs"
+                  stroke="var(--intent)"
+                  fillOpacity={1}
+                  fill="url(#colorTw)"
+                />
                 <Area type="monotone" dataKey="News" stroke="var(--warning)" fillOpacity={0} />
                 <Area type="monotone" dataKey="Twitter" stroke="var(--success)" fillOpacity={0} />
               </AreaChart>
@@ -229,14 +279,18 @@ function AnalyticsPage() {
             </ResponsiveContainer>
             <div className="absolute flex flex-col items-center">
               <span className="font-mono text-2xl font-bold">{s?.leads ?? 12}</span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Leads</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                Leads
+              </span>
             </div>
           </div>
           <div className="flex flex-wrap gap-x-3 gap-y-1.5 justify-center text-[10px]">
             {INTENT_DISTR.map((x) => (
               <div key={x.name} className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full" style={{ backgroundColor: x.color }} />
-                <span className="text-muted-foreground capitalize">{x.name} ({x.value}%)</span>
+                <span className="text-muted-foreground capitalize">
+                  {x.name} ({x.value}%)
+                </span>
               </div>
             ))}
           </div>
@@ -252,14 +306,26 @@ function AnalyticsPage() {
           </div>
           <div className="h-[240px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={FUNNEL_DATA} layout="vertical" margin={{ top: 10, right: 10, left: 30, bottom: 0 }}>
+              <BarChart
+                data={FUNNEL_DATA}
+                layout="vertical"
+                margin={{ top: 10, right: 10, left: 30, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis type="number" stroke="rgba(255,255,255,0.4)" fontSize={10} />
-                <YAxis dataKey="stage" type="category" stroke="rgba(255,255,255,0.4)" fontSize={10} />
+                <YAxis
+                  dataKey="stage"
+                  type="category"
+                  stroke="rgba(255,255,255,0.4)"
+                  fontSize={10}
+                />
                 <Tooltip />
                 <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]}>
                   {FUNNEL_DATA.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "var(--primary)" : "var(--intent)"} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={index % 2 === 0 ? "var(--primary)" : "var(--intent)"}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -272,7 +338,9 @@ function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-semibold text-sm">Best Outreach Heatmap</h2>
-              <p className="text-xs text-muted-foreground">Optimal connection times based on agent signals</p>
+              <p className="text-xs text-muted-foreground">
+                Optimal connection times based on agent signals
+              </p>
             </div>
             <Badge>Recommended</Badge>
           </div>
@@ -312,15 +380,28 @@ function AnalyticsPage() {
       <div className="rounded-2xl border border-border bg-card/60 p-5 space-y-3">
         <div>
           <h2 className="font-semibold text-sm">Signal Confidence Profile</h2>
-          <p className="text-xs text-muted-foreground">AI precision scores per signal channel provider</p>
+          <p className="text-xs text-muted-foreground">
+            AI precision scores per signal channel provider
+          </p>
         </div>
         <div className="h-[260px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={PIPELINE_VELOCITY}>
               <PolarGrid stroke="rgba(255,255,255,0.05)" />
               <PolarAngleAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={10} />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(255,255,255,0.3)" fontSize={8} />
-              <RechartsRadar name="Confidence score" dataKey="score" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+              <PolarRadiusAxis
+                angle={30}
+                domain={[0, 100]}
+                stroke="rgba(255,255,255,0.3)"
+                fontSize={8}
+              />
+              <RechartsRadar
+                name="Confidence score"
+                dataKey="score"
+                stroke="var(--primary)"
+                fill="var(--primary)"
+                fillOpacity={0.25}
+              />
               <Tooltip />
             </RadarChart>
           </ResponsiveContainer>

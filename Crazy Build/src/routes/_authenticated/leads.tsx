@@ -14,7 +14,7 @@ import {
   ArrowRight,
   ExternalLink,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { TiltCard } from "@/components/depth-system";
@@ -47,8 +47,7 @@ function LeadsPage() {
   });
 
   const setStatus = useMutation({
-    mutationFn: (v: { id: string; status: (typeof STATUSES)[number] }) =>
-      statusFn({ data: v }),
+    mutationFn: (v: { id: string; status: (typeof STATUSES)[number] }) => statusFn({ data: v }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["leads"] });
       toast.success("Lead status updated.");
@@ -59,7 +58,9 @@ function LeadsPage() {
     mutationFn: (id: string) => crmFn({ data: { lead_id: id } }),
     onSuccess: (r) => {
       if (r.skipped) {
-        toast.error("CRM Sync skipped. Toggle on connectors in settings or Project Settings → CRM.");
+        toast.error(
+          "CRM Sync skipped. Toggle on connectors in settings or Project Settings → CRM.",
+        );
       } else {
         toast.success("Synced to CRM pipeline successfully as a new Deal.", {
           description: `Deal ID: ${r.deal_id}`,
@@ -70,10 +71,10 @@ function LeadsPage() {
   });
 
   // Calculate dynamic metrics for presentation
-  const getLeadDetails = (l: typeof q.data[0]) => {
+  const getLeadDetails = (l: (typeof q.data)[0]) => {
     const probability = Math.round(l.score * 0.95);
     const dealSize = l.score * 150;
-    
+
     // Choose dynamic next action based on intent
     let nextAction = "Draft personalized email outreach";
     if (l.intent === "hiring") {
@@ -89,12 +90,17 @@ function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 md:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest text-primary font-semibold">Prioritization agent</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gradient">AI-Scored Leads</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Ranked prospects prioritized based on buying intentions, size triggers, and signal freshness.
+          <p className="text-[11px] md:text-xs uppercase tracking-widest text-primary font-semibold">
+            Prioritization agent
+          </p>
+          <h1 className="mt-1 text-2xl md:text-3xl font-semibold tracking-tight text-gradient">
+            AI-Scored Leads
+          </h1>
+          <p className="mt-1 text-[13px] md:text-sm text-muted-foreground">
+            Ranked prospects prioritized based on buying intentions, size triggers, and signal
+            freshness.
           </p>
         </div>
         <div
@@ -111,7 +117,8 @@ function LeadsPage() {
 
       {q.data.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-12 text-center text-xs text-muted-foreground">
-          No prioritized leads in log. Run a target scan to discover signals and compile leads automatically.
+          No prioritized leads in log. Run a target scan to discover signals and compile leads
+          automatically.
         </div>
       ) : (
         <div className="space-y-4.5">
@@ -119,13 +126,19 @@ function LeadsPage() {
             const details = getLeadDetails(l);
 
             return (
-              <TiltCard key={l.id} intensity="dense" className="rounded-2xl p-5 transition duration-200 text-left">
-                <div className="flex flex-col md:flex-row md:items-start gap-4 justify-between">
+              <TiltCard
+                key={l.id}
+                intensity="dense"
+                className="rounded-2xl p-4 md:p-5 transition duration-200 text-left"
+              >
+                <div className="flex flex-col md:flex-row md:items-start gap-3 md:gap-4 justify-between">
                   <div className="flex items-start gap-4">
                     {/* Score badge */}
                     <div className="grid shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary/15 to-intent/15 border border-primary/20 p-3 shadow-inner">
                       <div className="text-center min-w-[40px]">
-                        <div className="font-mono text-2xl font-black text-primary leading-none">{l.score}</div>
+                        <div className="font-mono text-2xl font-black text-primary leading-none">
+                          {l.score}
+                        </div>
                         <div className="text-[8px] uppercase font-bold tracking-widest text-muted-foreground mt-1">
                           priority
                         </div>
@@ -142,7 +155,9 @@ function LeadsPage() {
                           </span>
                         )}
                       </div>
-                      <h4 className="mt-2 text-sm font-semibold text-foreground leading-snug">{l.title}</h4>
+                      <h4 className="mt-2 text-sm font-semibold text-foreground leading-snug">
+                        {l.title}
+                      </h4>
                       {l.rationale && (
                         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
                           {l.rationale}
@@ -154,12 +169,20 @@ function LeadsPage() {
                   {/* Calculated metrics table */}
                   <div className="grid grid-cols-2 gap-x-6 gap-y-2 border-t md:border-t-0 border-border/40 pt-3 md:pt-0 shrink-0 text-left text-xs md:text-right font-mono">
                     <div>
-                      <span className="text-[10px] text-muted-foreground uppercase font-mono block">Probability</span>
-                      <span className="font-semibold text-success font-mono text-xs">{details.probability}% Convert</span>
+                      <span className="text-[10px] text-muted-foreground uppercase font-mono block">
+                        Probability
+                      </span>
+                      <span className="font-semibold text-success font-mono text-xs">
+                        {details.probability}% Convert
+                      </span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-muted-foreground uppercase font-mono block">Est. Deal size</span>
-                      <span className="font-semibold text-foreground text-xs">${details.dealSize.toLocaleString()}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase font-mono block">
+                        Est. Deal size
+                      </span>
+                      <span className="font-semibold text-foreground text-xs">
+                        ${details.dealSize.toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -168,7 +191,10 @@ function LeadsPage() {
                 <div className="mt-4 rounded-lg bg-background/50 border border-border/50 px-3.5 py-2.5 text-xs text-muted-foreground flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 min-w-0">
                     <TrendingUp className="h-4 w-4 text-primary shrink-0" />
-                    <span className="truncate"><span className="text-primary font-semibold">Next best action:</span> {details.nextAction}</span>
+                    <span className="truncate">
+                      <span className="text-primary font-semibold">Next best action:</span>{" "}
+                      {details.nextAction}
+                    </span>
                   </div>
                   <ArrowRight className="h-3.5 w-3.5 text-primary shrink-0" />
                 </div>
@@ -176,7 +202,9 @@ function LeadsPage() {
                 {/* CRM and Email Actions */}
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-3 text-xs">
                   <div className="flex items-center gap-2">
-                    <label className="text-[10px] text-muted-foreground uppercase font-mono mr-1">Deal Stage</label>
+                    <label className="text-[10px] text-muted-foreground uppercase font-mono mr-1">
+                      Deal Stage
+                    </label>
                     <select
                       value={l.status}
                       onChange={(e) =>

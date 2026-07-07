@@ -33,16 +33,22 @@ export const Route = createFileRoute("/_authenticated")({
   component: Layout,
 });
 
+import { ScrollToTop } from "@/components/scroll-to-top";
+
 function Layout() {
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-background text-foreground">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background text-foreground relative">
       <AppNav />
-      <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
+      <main
+        className="flex-1 overflow-y-auto px-2 py-3 md:px-5 md:py-6 relative"
+        id="main-scroll-area"
+      >
         <div className="mx-auto max-w-7xl">
           <Outlet />
         </div>
       </main>
       <AiAssistant />
+      <ScrollToTop />
     </div>
   );
 }

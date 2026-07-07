@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateText } from "ai";
@@ -65,7 +66,10 @@ function rowToCandidate(row: Record<string, unknown>): TalentCandidate {
   };
 }
 
-function filterCandidates(candidates: TalentCandidate[], filters: TalentSearchFilters): TalentCandidate[] {
+function filterCandidates(
+  candidates: TalentCandidate[],
+  filters: TalentSearchFilters,
+): TalentCandidate[] {
   return candidates.filter((c) => {
     const q = filters.query?.toLowerCase() ?? "";
     if (q) {
@@ -81,42 +85,67 @@ function filterCandidates(candidates: TalentCandidate[], filters: TalentSearchFi
         .toLowerCase();
       if (!haystack.includes(q)) return false;
     }
-    if (filters.job_title && !c.title.toLowerCase().includes(filters.job_title.toLowerCase())) return false;
-    if (filters.location && !c.location.toLowerCase().includes(filters.location.toLowerCase())) return false;
-    if (filters.industry && !c.industry.toLowerCase().includes(filters.industry.toLowerCase())) return false;
-    if (filters.remote_preference && c.remote_preference !== filters.remote_preference) return false;
-    if (filters.years_experience_min != null && c.years_experience < filters.years_experience_min) return false;
-    if (filters.years_experience_max != null && c.years_experience > filters.years_experience_max) return false;
+    if (filters.job_title && !c.title.toLowerCase().includes(filters.job_title.toLowerCase()))
+      return false;
+    if (filters.location && !c.location.toLowerCase().includes(filters.location.toLowerCase()))
+      return false;
+    if (filters.industry && !c.industry.toLowerCase().includes(filters.industry.toLowerCase()))
+      return false;
+    if (filters.remote_preference && c.remote_preference !== filters.remote_preference)
+      return false;
+    if (filters.years_experience_min != null && c.years_experience < filters.years_experience_min)
+      return false;
+    if (filters.years_experience_max != null && c.years_experience > filters.years_experience_max)
+      return false;
     if (filters.skills?.length) {
-      const allSkills = Object.values(c.skills).flat().map((s) => s.toLowerCase());
-      if (!filters.skills.every((s) => allSkills.some((cs) => cs.includes(s.toLowerCase())))) return false;
+      const allSkills = Object.values(c.skills)
+        .flat()
+        .map((s) => s.toLowerCase());
+      if (!filters.skills.every((s) => allSkills.some((cs) => cs.includes(s.toLowerCase()))))
+        return false;
     }
     if (filters.programming_languages?.length) {
       const langs = c.skills.programming_languages.map((l) => l.toLowerCase());
-      if (!filters.programming_languages.every((l) => langs.some((cl) => cl.includes(l.toLowerCase())))) return false;
+      if (
+        !filters.programming_languages.every((l) =>
+          langs.some((cl) => cl.includes(l.toLowerCase())),
+        )
+      )
+        return false;
     }
     return true;
   });
 }
 
 function computeRecommendations(candidates: TalentCandidate[]): TalentRecommendations {
-  const sorted = [...candidates].sort((a, b) => b.analysis.ai_match_score - a.analysis.ai_match_score);
+  const sorted = [...candidates].sort(
+    (a, b) => b.analysis.ai_match_score - a.analysis.ai_match_score,
+  );
   return {
     top_10: sorted.slice(0, 10),
     best_fit: sorted[0] ?? null,
-    fastest_learner: [...candidates].sort((a, b) => b.analysis.learning_potential - a.analysis.learning_potential)[0] ?? null,
-    most_experienced: [...candidates].sort((a, b) => b.years_experience - a.years_experience)[0] ?? null,
+    fastest_learner:
+      [...candidates].sort(
+        (a, b) => b.analysis.learning_potential - a.analysis.learning_potential,
+      )[0] ?? null,
+    most_experienced:
+      [...candidates].sort((a, b) => b.years_experience - a.years_experience)[0] ?? null,
     highest_ai_score: sorted[0] ?? null,
-    future_leader: [...candidates].sort((a, b) => b.analysis.leadership_score - a.analysis.leadership_score)[0] ?? null,
+    future_leader:
+      [...candidates].sort(
+        (a, b) => b.analysis.leadership_score - a.analysis.leadership_score,
+      )[0] ?? null,
   };
 }
 
 function computeStats(candidates: TalentCandidate[]): TalentStats {
   const skillCounts: Record<string, number> = {};
   candidates.forEach((c) => {
-    Object.values(c.skills).flat().forEach((s) => {
-      skillCounts[s] = (skillCounts[s] ?? 0) + 1;
-    });
+    Object.values(c.skills)
+      .flat()
+      .forEach((s) => {
+        skillCounts[s] = (skillCounts[s] ?? 0) + 1;
+      });
   });
   const topSkills = Object.entries(skillCounts)
     .sort((a, b) => b[1] - a[1])
@@ -129,10 +158,21 @@ function computeStats(candidates: TalentCandidate[]): TalentStats {
     count: candidates.filter((c) => c.pipeline_stage === stage).length,
   }));
 
-  const categories = ["programming_languages", "frameworks", "ai_ml", "llm_experience", "cloud", "devops", "databases"];
+  const categories = [
+    "programming_languages",
+    "frameworks",
+    "ai_ml",
+    "llm_experience",
+    "cloud",
+    "devops",
+    "databases",
+  ];
   const skill_distribution = categories.map((cat) => ({
     category: cat.replace(/_/g, " "),
-    count: candidates.reduce((sum, c) => sum + ((c.skills as Record<string, string[]>)[cat]?.length ?? 0), 0),
+    count: candidates.reduce(
+      (sum, c) => sum + ((c.skills as unknown as Record<string, string[]>)[cat]?.length ?? 0),
+      0,
+    ),
   }));
 
   const avg = candidates.length
@@ -151,12 +191,28 @@ function computeStats(candidates: TalentCandidate[]): TalentStats {
       { month: "Apr", hires: 1, interviews: 10 },
       { month: "May", hires: 4, interviews: 15 },
       { month: "Jun", hires: 2, interviews: 18 },
-      { month: "Jul", hires: candidates.filter((c) => c.pipeline_stage === "hired").length, interviews: candidates.filter((c) => c.pipeline_stage === "interview").length },
+      {
+        month: "Jul",
+        hires: candidates.filter((c) => c.pipeline_stage === "hired").length,
+        interviews: candidates.filter((c) => c.pipeline_stage === "interview").length,
+      },
     ],
   };
 }
 
-async function fetchCandidates(supabase: { from: (t: string) => { select: (s: string) => { order: (c: string, o: { ascending: boolean }) => Promise<{ data: unknown[] | null; error: { message: string } | null }> } } }, userId: string): Promise<TalentCandidate[]> {
+async function fetchCandidates(
+  supabase: {
+    from: (t: string) => {
+      select: (s: string) => {
+        order: (
+          c: string,
+          o: { ascending: boolean },
+        ) => Promise<{ data: unknown[] | null; error: { message: string } | null }>;
+      };
+    };
+  },
+  userId: string,
+): Promise<TalentCandidate[]> {
   const { data, error } = await supabase
     .from("talent_candidates")
     .select("*")
@@ -171,7 +227,7 @@ async function fetchCandidates(supabase: { from: (t: string) => { select: (s: st
 export const seedTalentCandidates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const existing = await fetchCandidates(context.supabase, context.userId).catch(() => []);
+    const existing = await fetchCandidates(context.supabase as any, context.userId).catch(() => []);
     if (existing.length > 0) return { seeded: false, count: existing.length };
 
     const rows = SEED_CANDIDATES.map((c) => ({
@@ -179,7 +235,7 @@ export const seedTalentCandidates = createServerFn({ method: "POST" })
       ...c,
     }));
 
-    const { error } = await context.supabase.from("talent_candidates").insert(rows);
+    const { error } = await (context.supabase as any).from("talent_candidates").insert(rows);
     if (error) {
       console.warn("[seedTalentCandidates] DB insert failed, using mock:", error.message);
       return { seeded: true, count: SEED_CANDIDATES.length, mock: true };
@@ -191,7 +247,7 @@ export const listCandidates = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     try {
-      const candidates = await fetchCandidates(context.supabase, context.userId);
+      const candidates = await fetchCandidates(context.supabase as any, context.userId);
       if (candidates.length === 0) {
         return SEED_CANDIDATES.map((c, i) => ({
           ...c,
@@ -254,7 +310,7 @@ export const updateCandidateStage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     if (data.id.startsWith("mock-")) return { ok: true, mock: true };
-    const { error } = await context.supabase
+    const { error } = await (context.supabase as any)
       .from("talent_candidates")
       .update({ pipeline_stage: data.pipeline_stage, updated_at: new Date().toISOString() })
       .eq("id", data.id)
@@ -375,13 +431,17 @@ ${data.job_description ? `Job Description:\n${data.job_description.slice(0, 4000
       const { text } = await generateText({ model, prompt });
       const parsed = JSON.parse(extractJsonPayload(text)) as ResumeAnalysis;
 
-      await context.supabase.from("talent_resumes").insert({
-        user_id: context.userId,
-        file_name: "uploaded-resume.txt",
-        resume_text: data.resume_text.slice(0, 10000),
-        analysis: parsed,
-        job_description: data.job_description ?? null,
-      }).catch(() => {});
+      try {
+        await (context.supabase as any).from("talent_resumes").insert({
+          user_id: context.userId,
+          file_name: "uploaded-resume.txt",
+          resume_text: data.resume_text.slice(0, 10000),
+          analysis: parsed,
+          job_description: data.job_description ?? null,
+        });
+      } catch (err) {
+        // ignore
+      }
 
       return parsed;
     } catch {
@@ -435,11 +495,15 @@ Return ONLY valid JSON:
       const { text } = await generateText({ model, prompt });
       const parsed = JSON.parse(extractJsonPayload(text)) as InterviewPlan;
 
-      await context.supabase.from("talent_interviews").insert({
-        user_id: context.userId,
-        role: data.role,
-        plan: parsed,
-      }).catch(() => {});
+      try {
+        await (context.supabase as any).from("talent_interviews").insert({
+          user_id: context.userId,
+          role: data.role,
+          plan: parsed,
+        });
+      } catch (err) {
+        // ignore
+      }
 
       return parsed;
     } catch {
@@ -472,13 +536,22 @@ Return ONLY valid JSON:
           "How would you architect a real-time analytics pipeline?",
         ],
         scoring_rubric: [
-          { criterion: "Technical Depth", weight: 30, description: "Domain expertise and problem-solving" },
+          {
+            criterion: "Technical Depth",
+            weight: 30,
+            description: "Domain expertise and problem-solving",
+          },
           { criterion: "Communication", weight: 20, description: "Clarity and collaboration" },
           { criterion: "Culture Fit", weight: 20, description: "Values alignment and teamwork" },
-          { criterion: "Growth Potential", weight: 15, description: "Learning agility and ambition" },
+          {
+            criterion: "Growth Potential",
+            weight: 15,
+            description: "Learning agility and ambition",
+          },
           { criterion: "Leadership", weight: 15, description: "Influence and ownership" },
         ],
-        final_recommendation: "Conduct structured interviews using the rubric. Compare scores against team benchmarks before making an offer.",
+        final_recommendation:
+          "Conduct structured interviews using the rubric. Compare scores against team benchmarks before making an offer.",
       } satisfies InterviewPlan;
     }
   });
@@ -490,10 +563,15 @@ export const talentCopilotAI = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const listFn = listCandidates;
-    const candidates = (await listFn({ context } as Parameters<typeof listFn>[0])) as TalentCandidate[];
+    const candidates = (await listFn({ context } as Parameters<
+      typeof listFn
+    >[0])) as TalentCandidate[];
     const summary = candidates
       .slice(0, 10)
-      .map((c) => `${c.name} (${c.title}) — AI Score: ${c.analysis.ai_match_score}, Rank: ${c.analysis.rank}`)
+      .map(
+        (c) =>
+          `${c.name} (${c.title}) — AI Score: ${c.analysis.ai_match_score}, Rank: ${c.analysis.rank}`,
+      )
       .join("\n");
 
     const prompt = `You are an AI Hiring Copilot for Signal Scout's Talent Intelligence platform.
@@ -516,28 +594,34 @@ Provide a helpful, specific answer in 2-4 paragraphs.`;
     } catch {
       const q = data.query.toLowerCase();
       if (q.includes("llm") || q.includes("best")) {
-        const best = [...candidates].sort((a, b) => b.analysis.ai_match_score - a.analysis.ai_match_score)[0];
+        const best = [...candidates].sort(
+          (a, b) => b.analysis.ai_match_score - a.analysis.ai_match_score,
+        )[0];
         return {
           response: `Based on AI Match Scores, **${best?.name ?? "Marcus Chen"}** (${best?.title ?? "LLM Engineer"}) is the top recommendation with a score of ${best?.analysis.ai_match_score ?? 97}/100. They have deep LLM expertise including RAG, fine-tuning, and agent orchestration. I recommend moving them to final interview stage.`,
         };
       }
       if (q.includes("compare")) {
         return {
-          response: "To compare candidates, navigate to Candidate Pipeline and select two profiles. Key dimensions: AI Match Score, Technical Score, Leadership Score, and Learning Potential. Marcus Chen leads on AI/LLM depth; Priya Sharma excels on frontend/React; Alex Petrov offers the most experience and leadership potential.",
+          response:
+            "To compare candidates, navigate to Candidate Pipeline and select two profiles. Key dimensions: AI Match Score, Technical Score, Leadership Score, and Learning Potential. Marcus Chen leads on AI/LLM depth; Priya Sharma excels on frontend/React; Alex Petrov offers the most experience and leadership potential.",
         };
       }
       if (q.includes("react")) {
         const reactCandidates = candidates.filter((c) =>
           c.skills.frameworks.some((f) => f.toLowerCase().includes("react")),
         );
-        const top = reactCandidates.sort((a, b) => b.analysis.technical_score - a.analysis.technical_score)[0];
+        const top = reactCandidates.sort(
+          (a, b) => b.analysis.technical_score - a.analysis.technical_score,
+        )[0];
         return {
           response: `**${top?.name ?? "Priya Sharma"}** has the strongest React experience with ${top?.years_experience ?? 7} years, expert TypeScript/Next.js skills, and open-source contributions. Technical score: ${top?.analysis.technical_score ?? 91}/100.`,
         };
       }
       if (q.includes("interview")) {
         return {
-          response: "Use the Interview Assistant to generate tailored question sets. For technical roles, I recommend combining coding questions with system design. For AI roles, include LLM-specific questions about RAG, evaluation, and prompt optimization.",
+          response:
+            "Use the Interview Assistant to generate tailored question sets. For technical roles, I recommend combining coding questions with system design. For AI roles, include LLM-specific questions about RAG, evaluation, and prompt optimization.",
         };
       }
       if (q.includes("hire") || q.includes("who should")) {
@@ -579,14 +663,25 @@ Candidates: ${JSON.stringify(selected.map((c) => ({ name: c.name, title: c.title
       const { text } = await generateText({ model, prompt });
       return JSON.parse(extractJsonPayload(text));
     } catch {
-      const winner = selected.sort((a, b) => b.analysis.ai_match_score - a.analysis.ai_match_score)[0];
+      const winner = selected.sort(
+        (a, b) => b.analysis.ai_match_score - a.analysis.ai_match_score,
+      )[0];
       return {
         summary: `Comparing ${selected.map((c) => c.name).join(" vs ")}. ${winner.name} leads on AI Match Score (${winner.analysis.ai_match_score}).`,
         winner: winner.name,
         dimensions: [
-          { name: "AI Match Score", scores: Object.fromEntries(selected.map((c) => [c.name, c.analysis.ai_match_score])) },
-          { name: "Technical", scores: Object.fromEntries(selected.map((c) => [c.name, c.analysis.technical_score])) },
-          { name: "Leadership", scores: Object.fromEntries(selected.map((c) => [c.name, c.analysis.leadership_score])) },
+          {
+            name: "AI Match Score",
+            scores: Object.fromEntries(selected.map((c) => [c.name, c.analysis.ai_match_score])),
+          },
+          {
+            name: "Technical",
+            scores: Object.fromEntries(selected.map((c) => [c.name, c.analysis.technical_score])),
+          },
+          {
+            name: "Leadership",
+            scores: Object.fromEntries(selected.map((c) => [c.name, c.analysis.leadership_score])),
+          },
         ],
         recommendation: `Recommend proceeding with ${winner.name} for next interview stage.`,
       };

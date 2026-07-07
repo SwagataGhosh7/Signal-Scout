@@ -17,7 +17,7 @@ import {
   Globe,
   Briefcase,
   CheckCircle2,
-  Clock
+  Clock,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
@@ -33,14 +33,20 @@ import {
   Pie,
   Cell,
   BarChart,
-  Bar
+  Bar,
 } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/app")({
   component: Dashboard,
 });
 
-const PIE_COLORS = ["var(--primary)", "var(--intent)", "var(--warning)", "var(--success)", "#8b5cf6"];
+const PIE_COLORS = [
+  "var(--primary)",
+  "var(--intent)",
+  "var(--warning)",
+  "var(--success)",
+  "#8b5cf6",
+];
 
 function Dashboard() {
   const statsFn = useServerFn(dashboardStats);
@@ -59,10 +65,10 @@ function Dashboard() {
 
   // Compute stats details
   const totalCompanies = targets.data.length;
-  const signalsToday = signals.data.filter(
-    (x) => new Date(x.detected_at).toDateString() === new Date().toDateString()
-  ).length || 8; // fallback to 8 for presentation if none harvested today
-  
+  const signalsToday =
+    signals.data.filter((x) => new Date(x.detected_at).toDateString() === new Date().toDateString())
+      .length || 8; // fallback to 8 for presentation if none harvested today
+
   const hotOpportunities = leads.data.filter((x) => x.score >= 80).length;
   const aiIntentScore = s.avgScore || 78;
   const qualifiedLeads = leads.data.filter((x) => x.status === "qualified").length;
@@ -85,7 +91,7 @@ function Dashboard() {
       const ind = t.industry || "Software";
       acc[ind] = (acc[ind] || 0) + 1;
       return acc;
-    }, {})
+    }, {}),
   ).map(([name, value]) => ({ name, value }));
 
   const finalIndustryData = industryData.length
@@ -107,27 +113,31 @@ function Dashboard() {
   return (
     <ParallaxField className="space-y-6">
       <OnboardingWizard hasTargets={targets.data.length > 0} />
-      
+
       {/* Dashboard Welcome Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 md:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest text-primary font-semibold">Mission Control</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gradient">Signal Scout Intelligence</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-[11px] md:text-xs uppercase tracking-widest text-primary font-semibold">
+            Mission Control
+          </p>
+          <h1 className="mt-1 text-2xl md:text-3xl font-semibold tracking-tight text-gradient">
+            Signal Scout Intelligence
+          </h1>
+          <p className="mt-1 text-[13px] md:text-sm text-muted-foreground">
             Monitor real-time buyer intent scans, scored leads, and automated outreach triggers.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             to="/pipeline"
-            className="depth-press flex items-center gap-1.5 rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent"
+            className="depth-press flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 md:px-4 md:py-2 text-[13px] md:text-sm font-medium hover:bg-accent"
           >
             <Play className="h-4 w-4 text-primary" />
             Topology
           </Link>
           <Link
             to="/targets"
-            className="depth-press flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground glow hover:opacity-90"
+            className="depth-press flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 md:px-4 md:py-2 text-[13px] md:text-sm font-semibold text-primary-foreground glow hover:opacity-90"
           >
             <PlusCircle className="h-4 w-4" />
             Add Target
@@ -136,15 +146,63 @@ function Dashboard() {
       </div>
 
       {/* Modern 8 KPI Grid */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <KpiCard title="Total Companies" value={totalCompanies} icon={Briefcase} change="+12% weekly" isPositive={true} />
-        <KpiCard title="Signals Today" value={signalsToday} icon={Radar} change="+24% vs yesterday" isPositive={true} />
-        <KpiCard title="Hot Opportunities" value={hotOpportunities} icon={Zap} change="Critical priority" isPositive={true} />
-        <KpiCard title="Avg Intent Score" value={`${aiIntentScore}%`} icon={TrendingUp} change="AI precision" isPositive={true} />
-        <KpiCard title="Qualified Leads" value={qualifiedLeads} icon={Target} change="Ready for outreach" isPositive={true} />
-        <KpiCard title="Emails Generated" value={emailsGenerated} icon={Mail} change="Outbound scripts" isPositive={true} />
-        <KpiCard title="CRM Sync Status" value={`${crmSyncedCount} Deals`} icon={Building} change="HubSpot linked" isPositive={true} />
-        <KpiCard title="Weekly Growth" value="+15.8%" icon={Activity} change="Conversion boost" isPositive={true} />
+      <div className="grid gap-2 md:gap-3 grid-cols-2 lg:grid-cols-4">
+        <KpiCard
+          title="Total Companies"
+          value={totalCompanies}
+          icon={Briefcase}
+          change="+12% weekly"
+          isPositive={true}
+        />
+        <KpiCard
+          title="Signals Today"
+          value={signalsToday}
+          icon={Radar}
+          change="+24% vs yesterday"
+          isPositive={true}
+        />
+        <KpiCard
+          title="Hot Opportunities"
+          value={hotOpportunities}
+          icon={Zap}
+          change="Critical priority"
+          isPositive={true}
+        />
+        <KpiCard
+          title="Avg Intent Score"
+          value={`${aiIntentScore}%`}
+          icon={TrendingUp}
+          change="AI precision"
+          isPositive={true}
+        />
+        <KpiCard
+          title="Qualified Leads"
+          value={qualifiedLeads}
+          icon={Target}
+          change="Ready for outreach"
+          isPositive={true}
+        />
+        <KpiCard
+          title="Emails Generated"
+          value={emailsGenerated}
+          icon={Mail}
+          change="Outbound scripts"
+          isPositive={true}
+        />
+        <KpiCard
+          title="CRM Sync Status"
+          value={`${crmSyncedCount} Deals`}
+          icon={Building}
+          change="HubSpot linked"
+          isPositive={true}
+        />
+        <KpiCard
+          title="Weekly Growth"
+          value="+15.8%"
+          icon={Activity}
+          change="Conversion boost"
+          isPositive={true}
+        />
       </div>
 
       {/* Interactive Charts Panel */}
@@ -154,13 +212,18 @@ function Dashboard() {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-semibold text-sm">Signal Volume Trend</h3>
-              <p className="text-xs text-muted-foreground">Scrape frequency logs over current week</p>
+              <p className="text-xs text-muted-foreground">
+                Scrape frequency logs over current week
+              </p>
             </div>
             <Badge>Active Swarm</Badge>
           </div>
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={signalTrendData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+              <AreaChart
+                data={signalTrendData}
+                margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="colorSignals" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
@@ -169,8 +232,16 @@ function Dashboard() {
                 </defs>
                 <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" fontSize={10} />
                 <YAxis stroke="rgba(255,255,255,0.4)" fontSize={10} />
-                <Tooltip contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }} />
-                <Area type="monotone" dataKey="Signals" stroke="var(--primary)" fillOpacity={1} fill="url(#colorSignals)" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Signals"
+                  stroke="var(--primary)"
+                  fillOpacity={1}
+                  fill="url(#colorSignals)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -180,7 +251,9 @@ function Dashboard() {
         <DepthLayer className="rounded-2xl p-5 space-y-3">
           <div>
             <h3 className="font-semibold text-sm">Industry Distribution</h3>
-            <p className="text-xs text-muted-foreground">Target companies categorized by business sector</p>
+            <p className="text-xs text-muted-foreground">
+              Target companies categorized by business sector
+            </p>
           </div>
           <div className="h-[150px] w-full relative flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -203,14 +276,21 @@ function Dashboard() {
             </ResponsiveContainer>
             <div className="absolute flex flex-col items-center">
               <span className="font-mono text-xl font-bold">{totalCompanies}</span>
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Accounts</span>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                Accounts
+              </span>
             </div>
           </div>
           <div className="flex flex-wrap gap-x-2 gap-y-1 justify-center text-[10px] text-muted-foreground">
             {finalIndustryData.map((item, idx) => (
               <div key={item.name} className="flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }} />
-                <span>{item.name} ({item.value})</span>
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }}
+                />
+                <span>
+                  {item.name} ({item.value})
+                </span>
               </div>
             ))}
           </div>
@@ -225,7 +305,10 @@ function Dashboard() {
               <h3 className="font-semibold text-sm">Prioritized B2B Opportunities</h3>
               <p className="text-xs text-muted-foreground">Lead prioritization agent scores</p>
             </div>
-            <Link to="/leads" className="flex items-center gap-1 text-xs text-primary hover:underline font-semibold">
+            <Link
+              to="/leads"
+              className="flex items-center gap-1 text-xs text-primary hover:underline font-semibold"
+            >
               View All Leads <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -247,12 +330,16 @@ function Dashboard() {
                     <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
                       <Badge>{l.intent ?? "buying"}</Badge>
                       <UrgencyBadge urgency={l.urgency} />
-                      <span className="font-mono text-muted-foreground">Est deal: ${(l.score * 150).toLocaleString()}</span>
+                      <span className="font-mono text-muted-foreground">
+                        Est deal: ${(l.score * 150).toLocaleString()}
+                      </span>
                     </div>
                   </div>
                   <div className="ml-4 text-right">
                     <div className="font-mono text-base font-bold text-primary">{l.score}</div>
-                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground">score</div>
+                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                      score
+                    </div>
                   </div>
                 </div>
               ))}
@@ -268,7 +355,11 @@ function Dashboard() {
           </div>
           <div className="h-[180px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={funnelData} layout="vertical" margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+              <BarChart
+                data={funnelData}
+                layout="vertical"
+                margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+              >
                 <XAxis type="number" stroke="rgba(255,255,255,0.3)" fontSize={8} />
                 <YAxis dataKey="name" type="category" stroke="rgba(255,255,255,0.4)" fontSize={9} />
                 <Tooltip />
@@ -290,9 +381,14 @@ function Dashboard() {
           <div className="flex items-center justify-between border-b border-border/40 pb-3">
             <div>
               <h3 className="font-semibold text-sm">Recent Activity Logs</h3>
-              <p className="text-xs text-muted-foreground">Real-time signals captured across channels</p>
+              <p className="text-xs text-muted-foreground">
+                Real-time signals captured across channels
+              </p>
             </div>
-            <Link to="/signals" className="flex items-center gap-1 text-xs text-primary hover:underline font-semibold">
+            <Link
+              to="/signals"
+              className="flex items-center gap-1 text-xs text-primary hover:underline font-semibold"
+            >
               Live Signals Feed <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -308,10 +404,13 @@ function Dashboard() {
                     <div className="flex items-center gap-2">
                       <Badge>{sig.signal_type}</Badge>
                       <span className="text-[10px] text-muted-foreground font-mono uppercase">
-                        {sig.source} · {formatDistanceToNow(new Date(sig.detected_at), { addSuffix: true })}
+                        {sig.source} ·{" "}
+                        {formatDistanceToNow(new Date(sig.detected_at), { addSuffix: true })}
                       </span>
                     </div>
-                    <h4 className="mt-1 text-xs font-semibold text-foreground leading-snug">{sig.title}</h4>
+                    <h4 className="mt-1 text-xs font-semibold text-foreground leading-snug">
+                      {sig.title}
+                    </h4>
                     {sig.summary && (
                       <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
                         {sig.summary}
@@ -416,7 +515,7 @@ function KpiCard({
   value,
   icon: Icon,
   change,
-  isPositive
+  isPositive,
 }: {
   title: string;
   value: string | number;
@@ -427,14 +526,18 @@ function KpiCard({
   return (
     <TiltCard intensity="dense" className="rounded-2xl p-4">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground">{title}</span>
+        <span className="text-[10px] uppercase font-mono tracking-wider text-muted-foreground">
+          {title}
+        </span>
         <div className="grid h-7 w-7 place-items-center rounded-md bg-primary/10 text-primary">
           <Icon className="h-4 w-4" />
         </div>
       </div>
       <div className="mt-2 font-mono text-2xl font-bold text-foreground">{value}</div>
       <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground">
-        <ArrowUpRight className={`h-3 w-3 ${isPositive ? "text-success" : "text-muted-foreground"}`} />
+        <ArrowUpRight
+          className={`h-3 w-3 ${isPositive ? "text-success" : "text-muted-foreground"}`}
+        />
         <span>{change}</span>
       </div>
     </TiltCard>
@@ -442,8 +545,7 @@ function KpiCard({
 }
 
 function ScoreDot({ score }: { score: number }) {
-  const color =
-    score >= 75 ? "bg-destructive" : score >= 55 ? "bg-warning" : "bg-success";
+  const color = score >= 75 ? "bg-destructive" : score >= 55 ? "bg-warning" : "bg-success";
   return <div className={`h-2 w-2 shrink-0 rounded-full ${color}`} />;
 }
 

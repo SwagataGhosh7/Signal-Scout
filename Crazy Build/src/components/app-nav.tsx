@@ -16,11 +16,12 @@ import {
   ChevronRight,
   Search,
   Sparkles,
-  Briefcase
+  Briefcase,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DepthLayer } from "@/components/depth-system";
 import { useEffect, useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const items = [
   { to: "/app", label: "Dashboard", icon: Activity, badge: null },
@@ -70,8 +71,8 @@ export function AppNav() {
         {/* Brand */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-border/40">
           <Link to="/app" className="flex items-center gap-2 overflow-hidden">
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary glow">
-              <Radar className="h-4.5 w-4.5 animate-pulse" />
+            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary glow">
+              <Radar className="h-4 w-4 animate-pulse" />
             </div>
             {!collapsed && (
               <span className="font-semibold text-sm tracking-tight text-gradient whitespace-nowrap">
@@ -112,14 +113,14 @@ export function AppNav() {
         )}
 
         {/* Navigation list */}
-        <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
+        <nav className="flex-1 space-y-0.5 px-2 py-3 overflow-y-auto">
           {items.map((it) => {
             const active = loc.pathname.startsWith(it.to);
             return (
               <Link
                 key={it.to}
                 to={it.to}
-                className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition ${
+                className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition ${
                   active
                     ? "bg-primary/10 text-primary shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
                     : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
@@ -127,17 +128,21 @@ export function AppNav() {
                 title={collapsed ? it.label : undefined}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <it.icon className={`h-4.5 w-4.5 shrink-0 ${active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
+                  <it.icon
+                    className={`h-4 w-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}
+                  />
                   {!collapsed && <span className="truncate">{it.label}</span>}
                 </div>
                 {!collapsed && it.badge && (
-                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase ${
-                    it.badge === "Live"
-                      ? "bg-success/15 text-success border border-success/30"
-                      : it.badge === "Hot"
-                      ? "bg-destructive/15 text-destructive border border-destructive/30"
-                      : "bg-primary/15 text-primary border border-primary/30"
-                  }`}>
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase ${
+                      it.badge === "Live"
+                        ? "bg-success/15 text-success border border-success/30"
+                        : it.badge === "Hot"
+                          ? "bg-destructive/15 text-destructive border border-destructive/30"
+                          : "bg-primary/15 text-primary border border-primary/30"
+                    }`}
+                  >
                     {it.badge}
                   </span>
                 )}
@@ -148,17 +153,30 @@ export function AppNav() {
 
         {/* Floating Assistant Indicator (Collapsed / Expanded) */}
         {!collapsed && (
-          <div className="mx-3 my-2 p-3 rounded-xl border border-primary/20 bg-primary/5 text-xs text-muted-foreground flex flex-col gap-2">
+          <div className="mx-2 my-2 p-2.5 rounded-xl border border-primary/20 bg-primary/5 text-xs text-muted-foreground flex flex-col gap-1.5">
             <div className="flex items-center gap-1.5 text-primary font-medium">
-              <Sparkles className="h-3.5 w-3.5" />
+              <Sparkles className="h-3 w-3" />
               <span>Agentic Co-Pilot</span>
             </div>
-            <p className="text-[11px] leading-relaxed">AI Agents are scanning targets. Tap the bubble to talk.</p>
+            <p className="text-[10px] leading-relaxed">
+              AI Agents are scanning targets. Tap the bubble to talk.
+            </p>
           </div>
         )}
 
         {/* Sidebar Footer */}
         <div className="border-t border-border/40 p-2 space-y-1">
+          {!collapsed && (
+            <div className="px-3 py-2 flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">Theme</span>
+              <ThemeToggle />
+            </div>
+          )}
+          {collapsed && (
+            <div className="flex w-full items-center justify-center py-2">
+              <ThemeToggle />
+            </div>
+          )}
           {collapsed && (
             <button
               onClick={toggleCollapse}
@@ -181,35 +199,41 @@ export function AppNav() {
       </DepthLayer>
 
       {/* Mobile Top Header & Bottom Nav */}
-      <DepthLayer level="floating" className="md:hidden flex flex-col w-full bg-card/40 backdrop-blur sticky top-0 z-20 border-b border-border/60">
-        <div className="flex h-14 items-center justify-between px-4">
+      <DepthLayer
+        level="floating"
+        className="md:hidden flex flex-col w-full bg-card/40 backdrop-blur sticky top-0 z-20 border-b border-border/60"
+      >
+        <div className="flex h-12 items-center justify-between px-3">
           <Link to="/app" className="flex items-center gap-2">
             <div className="grid h-8 w-8 place-items-center rounded-md bg-primary/15 text-primary">
               <Radar className="h-4 w-4 animate-pulse" />
             </div>
             <span className="font-semibold tracking-tight text-gradient">Signal Scout</span>
           </Link>
-          <button
-            onClick={signOut}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-accent"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={signOut}
+              className="rounded-md p-1.5 text-muted-foreground hover:bg-accent"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        
+
         {/* Horizontal Nav Bar for mobile (scrollable) */}
-        <nav className="flex gap-1 overflow-x-auto border-t border-border/60 px-2 py-1.5 bg-background/50">
+        <nav className="flex gap-0.5 overflow-x-auto border-t border-border/60 px-1.5 py-1 bg-background/50 scrollbar-hide">
           {items.map((it) => {
             const active = loc.pathname.startsWith(it.to);
             return (
               <Link
                 key={it.to}
                 to={it.to}
-                className={`flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition ${
+                className={`flex shrink-0 items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition ${
                   active ? "bg-primary/15 text-primary" : "text-muted-foreground"
                 }`}
               >
-                <it.icon className="h-3.5 w-3.5" />
+                <it.icon className="h-3 w-3" />
                 <span>{it.label}</span>
               </Link>
             );

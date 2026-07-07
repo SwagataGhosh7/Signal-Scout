@@ -15,7 +15,7 @@ import {
   Loader2,
   CheckCircle,
   FileText,
-  UserCheck
+  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,10 +31,14 @@ function OutreachPage() {
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
 
   // Outreach configs
-  const [tone, setTone] = useState<"Professional" | "Friendly" | "Executive" | "Startup">("Professional");
+  const [tone, setTone] = useState<"Professional" | "Friendly" | "Executive" | "Startup">(
+    "Professional",
+  );
   const [length, setLength] = useState<"short" | "medium" | "detailed">("medium");
   const [cta, setCta] = useState("15-min introductory call next Tuesday");
-  const [channel, setChannel] = useState<"email" | "linkedin" | "partnership" | "followup">("email");
+  const [channel, setChannel] = useState<"email" | "linkedin" | "partnership" | "followup">(
+    "email",
+  );
 
   const [isRegenerating, setIsRegenerating] = useState(false);
 
@@ -51,25 +55,26 @@ function OutreachPage() {
       return;
     }
     setIsRegenerating(true);
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: "Running agentic AI text models...",
-        success: () => {
-          setIsRegenerating(false);
-          qc.invalidateQueries({ queryKey: ["drafts"] });
-          return "Outreach script successfully re-drafted using updated parameters.";
-        },
-        error: "AI model connection timeout",
-      }
-    );
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
+      loading: "Running agentic AI text models...",
+      success: () => {
+        setIsRegenerating(false);
+        qc.invalidateQueries({ queryKey: ["drafts"] });
+        return "Outreach script successfully re-drafted using updated parameters.";
+      },
+      error: "AI model connection timeout",
+    });
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-widest text-primary font-semibold">Automation agent</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gradient">AI Outreach Drafts</h1>
+        <p className="text-xs uppercase tracking-widest text-primary font-semibold">
+          Automation agent
+        </p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gradient">
+          AI Outreach Drafts
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Review, customize, and copy B2B outbound sequences drafted by the outreach agent.
         </p>
@@ -77,7 +82,8 @@ function OutreachPage() {
 
       {q.data.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-12 text-center text-xs text-muted-foreground">
-          No drafts generated yet. Visit the Leads tab and click "Draft Outreach" on any opportunity.
+          No drafts generated yet. Visit the Leads tab and click "Draft Outreach" on any
+          opportunity.
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-3 items-start">
@@ -104,9 +110,12 @@ function OutreachPage() {
                       <Mail className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-xs font-semibold text-foreground truncate">{d.subject ?? "Email Draft"}</h4>
+                      <h4 className="text-xs font-semibold text-foreground truncate">
+                        {d.subject ?? "Email Draft"}
+                      </h4>
                       <span className="text-[10px] text-muted-foreground font-mono">
-                        {formatDistanceToNow(new Date(d.created_at), { addSuffix: true })} · {d.channel}
+                        {formatDistanceToNow(new Date(d.created_at), { addSuffix: true })} ·{" "}
+                        {d.channel}
                       </span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground/60 shrink-0 self-center" />
@@ -124,15 +133,23 @@ function OutreachPage() {
                 <div className="rounded-2xl border border-border bg-card/65 p-4 space-y-4 text-left">
                   <div className="flex items-center gap-1.5 border-b border-border/40 pb-2">
                     <Sliders className="h-4 w-4 text-primary" />
-                    <h3 className="font-semibold text-xs text-foreground uppercase font-mono tracking-wider">AI parameters</h3>
+                    <h3 className="font-semibold text-xs text-foreground uppercase font-mono tracking-wider">
+                      AI parameters
+                    </h3>
                   </div>
 
                   <div className="space-y-3 text-xs">
                     <div>
-                      <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Outbound Channel</label>
+                      <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                        Outbound Channel
+                      </label>
                       <select
                         value={channel}
-                        onChange={(e) => setChannel(e.target.value as any)}
+                        onChange={(e) =>
+                          setChannel(
+                            e.target.value as "email" | "linkedin" | "partnership" | "followup",
+                          )
+                        }
                         className="w-full rounded border border-border bg-input px-2 py-1 text-xs"
                       >
                         <option value="email">Cold Email</option>
@@ -143,10 +160,16 @@ function OutreachPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Tone & Voice</label>
+                      <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                        Tone & Voice
+                      </label>
                       <select
                         value={tone}
-                        onChange={(e) => setTone(e.target.value as any)}
+                        onChange={(e) =>
+                          setTone(
+                            e.target.value as "Professional" | "Friendly" | "Executive" | "Startup",
+                          )
+                        }
                         className="w-full rounded border border-border bg-input px-2 py-1 text-xs"
                       >
                         <option value="Professional">Professional Corporate</option>
@@ -157,14 +180,18 @@ function OutreachPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Length Limit</label>
+                      <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                        Length Limit
+                      </label>
                       <div className="flex rounded border border-border bg-background p-0.5 text-xs text-center font-mono">
                         {(["short", "medium", "detailed"] as const).map((l) => (
                           <button
                             key={l}
                             onClick={() => setLength(l)}
                             className={`flex-1 rounded py-0.5 text-[10px] capitalize transition ${
-                              length === l ? "bg-primary/15 text-primary font-bold" : "text-muted-foreground"
+                              length === l
+                                ? "bg-primary/15 text-primary font-bold"
+                                : "text-muted-foreground"
                             }`}
                           >
                             {l}
@@ -174,7 +201,9 @@ function OutreachPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">Call to Action (CTA)</label>
+                      <label className="text-[10px] text-muted-foreground uppercase font-mono block mb-1">
+                        Call to Action (CTA)
+                      </label>
                       <textarea
                         value={cta}
                         onChange={(e) => setCta(e.target.value)}
@@ -204,14 +233,19 @@ function OutreachPage() {
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-4.5 w-4.5 text-primary" />
                       <div className="text-left">
-                        <span className="text-[10px] uppercase font-mono text-muted-foreground">Generated draft preview</span>
+                        <span className="text-[10px] uppercase font-mono text-muted-foreground">
+                          Generated draft preview
+                        </span>
                         <h4 className="font-semibold text-xs text-foreground mt-0.5">
-                          Format: {channel === "email" ? "B2B Outreach Email" : "LinkedIn Connect Script"}
+                          Format:{" "}
+                          {channel === "email" ? "B2B Outreach Email" : "LinkedIn Connect Script"}
                         </h4>
                       </div>
                     </div>
                     <button
-                      onClick={() => copy(`Subject: ${selectedDraft.subject}\n\n${selectedDraft.body}`)}
+                      onClick={() =>
+                        copy(`Subject: ${selectedDraft.subject}\n\n${selectedDraft.body}`)
+                      }
                       className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
                     >
                       <Copy className="h-3 w-3" /> Copy
@@ -238,7 +272,8 @@ function OutreachPage() {
 
                   <div className="flex justify-between items-center text-[10px] text-muted-foreground font-mono">
                     <span className="flex items-center gap-1">
-                      <UserCheck className="h-3.5 w-3.5 text-primary" /> Grounded in intent signal contexts
+                      <UserCheck className="h-3.5 w-3.5 text-primary" /> Grounded in intent signal
+                      contexts
                     </span>
                     <span>Words: {selectedDraft.body.split(/\s+/).filter(Boolean).length}</span>
                   </div>

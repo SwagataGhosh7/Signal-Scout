@@ -32,12 +32,22 @@ export function ScoreDisplay({ score, label, size = "md", animated = true }: Sco
   };
 
   const color =
-    score >= 90 ? "text-emerald-400" : score >= 75 ? "text-primary" : score >= 60 ? "text-amber-400" : "text-muted-foreground";
+    score >= 90
+      ? "text-emerald-400"
+      : score >= 75
+        ? "text-primary"
+        : score >= 60
+          ? "text-amber-400"
+          : "text-muted-foreground";
 
   return (
     <div className="grid place-items-center rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 to-intent/10 p-3 shadow-inner">
-      <div className={`font-mono font-black leading-none ${sizeClasses[size]} ${color}`}>{display}</div>
-      <div className="mt-1 text-[8px] font-bold uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className={`font-mono font-black leading-none ${sizeClasses[size]} ${color}`}>
+        {display}
+      </div>
+      <div className="mt-1 text-[8px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </div>
     </div>
   );
 }

@@ -16,7 +16,7 @@ import {
   ToggleRight,
   Play,
   History,
-  Info
+  Info,
 } from "lucide-react";
 import { Badge } from "./app";
 
@@ -72,15 +72,43 @@ const INITIAL_NODES: WorkflowNode[] = [
     icon: Building2,
     enabled: true,
     desc: "Create Deal inside CRM & send notification.",
-    config: { provider: "HubSpot", slack_alerts: true, webhook: "https://hooks.slack.com/services/..." },
+    config: {
+      provider: "HubSpot",
+      slack_alerts: true,
+      webhook: "https://hooks.slack.com/services/...",
+    },
   },
 ];
 
 const RUN_HISTORY = [
-  { time: "Just now", target: "Supabase", action: "Lead Sync", result: "Synced as CRM Deal #421", status: "success" },
-  { time: "2 hours ago", target: "Vercel", action: "Outreach Draft", result: "Email drafted (Executive tone)", status: "success" },
-  { time: "4 hours ago", target: "Stripe", action: "Lead Score", result: "Score calculated: 92 (Critical)", status: "success" },
-  { time: "Yesterday", target: "Retool", action: "Signal Harvest", result: "Harvested 4 expansion signals", status: "success" },
+  {
+    time: "Just now",
+    target: "Supabase",
+    action: "Lead Sync",
+    result: "Synced as CRM Deal #421",
+    status: "success",
+  },
+  {
+    time: "2 hours ago",
+    target: "Vercel",
+    action: "Outreach Draft",
+    result: "Email drafted (Executive tone)",
+    status: "success",
+  },
+  {
+    time: "4 hours ago",
+    target: "Stripe",
+    action: "Lead Score",
+    result: "Score calculated: 92 (Critical)",
+    status: "success",
+  },
+  {
+    time: "Yesterday",
+    target: "Retool",
+    action: "Signal Harvest",
+    result: "Harvested 4 expansion signals",
+    status: "success",
+  },
 ];
 
 function AutomationPage() {
@@ -92,9 +120,7 @@ function AutomationPage() {
 
   const handleToggle = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNodes(
-      nodes.map((n) => (n.id === id ? { ...n, enabled: !n.enabled } : n))
-    );
+    setNodes(nodes.map((n) => (n.id === id ? { ...n, enabled: !n.enabled } : n)));
     const n = nodes.find((x) => x.id === id);
     if (n) {
       toast.info(`${n.label} auto-step ${n.enabled ? "disabled" : "enabled"}`);
@@ -104,26 +130,21 @@ function AutomationPage() {
   const updateConfig = (key: string, value: string | number | boolean) => {
     setNodes(
       nodes.map((n) =>
-        n.id === selectedNodeId
-          ? { ...n, config: { ...n.config, [key]: value } }
-          : n
-      )
+        n.id === selectedNodeId ? { ...n, config: { ...n.config, [key]: value } } : n,
+      ),
     );
   };
 
   const triggerPipeline = () => {
     setIsRunning(true);
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: "Running agentic pipeline scan...",
-        success: () => {
-          setIsRunning(false);
-          return "Workflow run complete. Scanned targets, drafted emails, and updated CRM dashboards.";
-        },
-        error: "Pipeline error",
-      }
-    );
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
+      loading: "Running agentic pipeline scan...",
+      success: () => {
+        setIsRunning(false);
+        return "Workflow run complete. Scanned targets, drafted emails, and updated CRM dashboards.";
+      },
+      error: "Pipeline error",
+    });
   };
 
   return (
@@ -170,8 +191,8 @@ function AutomationPage() {
                         active
                           ? "border-primary bg-primary/10 glow"
                           : n.enabled
-                          ? "border-border bg-background/50 hover:border-border/80"
-                          : "border-border/30 bg-muted/5 opacity-55 hover:opacity-80"
+                            ? "border-border bg-background/50 hover:border-border/80"
+                            : "border-border/30 bg-muted/5 opacity-55 hover:opacity-80"
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -180,8 +201,8 @@ function AutomationPage() {
                             active
                               ? "bg-primary/20 border-primary text-primary"
                               : n.enabled
-                              ? "bg-muted border-border/80 text-foreground"
-                              : "bg-muted/30 border-border/30 text-muted-foreground"
+                                ? "bg-muted border-border/80 text-foreground"
+                                : "bg-muted/30 border-border/30 text-muted-foreground"
                           }`}
                         >
                           <Icon className="h-4.5 w-4.5" />
@@ -231,7 +252,9 @@ function AutomationPage() {
           </div>
 
           <div className="border-t border-border/40 pt-4 flex justify-between items-center text-xs text-muted-foreground">
-            <span>Workflow Status: <span className="text-success font-semibold">Active Swarm</span></span>
+            <span>
+              Workflow Status: <span className="text-success font-semibold">Active Swarm</span>
+            </span>
             <span>Total Nodes: 5</span>
           </div>
         </div>
@@ -249,7 +272,9 @@ function AutomationPage() {
               {selectedNode.id === "scantargets" && (
                 <>
                   <div>
-                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">Scan Frequency</label>
+                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">
+                      Scan Frequency
+                    </label>
                     <select
                       value={selectedNode.config.freq as string}
                       onChange={(e) => updateConfig("freq", e.target.value)}
@@ -261,7 +286,9 @@ function AutomationPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">Min Confidence Score ({selectedNode.config.min_confidence}%)</label>
+                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">
+                      Min Confidence Score ({selectedNode.config.min_confidence}%)
+                    </label>
                     <input
                       type="range"
                       min="50"
@@ -277,7 +304,9 @@ function AutomationPage() {
               {selectedNode.id === "geminianalyze" && (
                 <>
                   <div>
-                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">AI Processor</label>
+                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">
+                      AI Processor
+                    </label>
                     <select
                       value={selectedNode.config.model as string}
                       onChange={(e) => updateConfig("model", e.target.value)}
@@ -296,7 +325,9 @@ function AutomationPage() {
                         checked={selectedNode.config.buying_intent as boolean}
                         onChange={(e) => updateConfig("buying_intent", e.target.checked)}
                       />
-                      <label htmlFor="buy" className="text-muted-foreground">Extract buying intent signals</label>
+                      <label htmlFor="buy" className="text-muted-foreground">
+                        Extract buying intent signals
+                      </label>
                     </div>
                     <div className="flex items-center gap-2">
                       <input
@@ -305,7 +336,9 @@ function AutomationPage() {
                         checked={selectedNode.config.hiring_intent as boolean}
                         onChange={(e) => updateConfig("hiring_intent", e.target.checked)}
                       />
-                      <label htmlFor="hire" className="text-muted-foreground">Extract hiring intent signals</label>
+                      <label htmlFor="hire" className="text-muted-foreground">
+                        Extract hiring intent signals
+                      </label>
                     </div>
                   </div>
                 </>
@@ -314,7 +347,9 @@ function AutomationPage() {
               {selectedNode.id === "prioritizelead" && (
                 <>
                   <div>
-                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">Qualifying Threshold Score ({selectedNode.config.min_score})</label>
+                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">
+                      Qualifying Threshold Score ({selectedNode.config.min_score})
+                    </label>
                     <input
                       type="range"
                       min="50"
@@ -335,7 +370,9 @@ function AutomationPage() {
                       checked={selectedNode.config.deal_size_est as boolean}
                       onChange={(e) => updateConfig("deal_size_est", e.target.checked)}
                     />
-                    <label htmlFor="est" className="text-muted-foreground">Auto-estimate deal values</label>
+                    <label htmlFor="est" className="text-muted-foreground">
+                      Auto-estimate deal values
+                    </label>
                   </div>
                 </>
               )}
@@ -343,7 +380,9 @@ function AutomationPage() {
               {selectedNode.id === "outreachdraft" && (
                 <>
                   <div>
-                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">Default Template Persona</label>
+                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">
+                      Default Template Persona
+                    </label>
                     <select
                       value={selectedNode.config.tone as string}
                       onChange={(e) => updateConfig("tone", e.target.value)}
@@ -356,7 +395,9 @@ function AutomationPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">Call to Action (CTA)</label>
+                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">
+                      Call to Action (CTA)
+                    </label>
                     <input
                       value={selectedNode.config.cta as string}
                       onChange={(e) => updateConfig("cta", e.target.value)}
@@ -369,7 +410,9 @@ function AutomationPage() {
               {selectedNode.id === "crmsync" && (
                 <>
                   <div>
-                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">Sync Target CRM</label>
+                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">
+                      Sync Target CRM
+                    </label>
                     <select
                       value={selectedNode.config.provider as string}
                       onChange={(e) => updateConfig("provider", e.target.value)}
@@ -381,7 +424,9 @@ function AutomationPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">Slack Alerts Webhook URL</label>
+                    <label className="text-[11px] text-muted-foreground uppercase font-mono block mb-1">
+                      Slack Alerts Webhook URL
+                    </label>
                     <input
                       value={selectedNode.config.webhook as string}
                       onChange={(e) => updateConfig("webhook", e.target.value)}

@@ -28,7 +28,10 @@ export function SkillRadarChart({ analysis, className }: SkillRadarChartProps) {
       <ResponsiveContainer width="100%" height={220}>
         <RadarChart data={data}>
           <PolarGrid stroke="var(--border)" />
-          <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} />
+          <PolarAngleAxis
+            dataKey="subject"
+            tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
+          />
           <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
           <Radar
             name="Score"

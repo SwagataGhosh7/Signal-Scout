@@ -13,7 +13,13 @@ interface CandidateCardProps {
   actions?: React.ReactNode;
 }
 
-export function CandidateCard({ candidate, selected, onSelect, compact, actions }: CandidateCardProps) {
+export function CandidateCard({
+  candidate,
+  selected,
+  onSelect,
+  compact,
+  actions,
+}: CandidateCardProps) {
   const c = candidate;
 
   return (
@@ -25,7 +31,11 @@ export function CandidateCard({ candidate, selected, onSelect, compact, actions 
       onClick={() => onSelect?.(c.id)}
     >
       <div className="flex flex-col md:flex-row md:items-start gap-4">
-        <ScoreDisplay score={c.analysis.ai_match_score} label="AI Match" size={compact ? "sm" : "md"} />
+        <ScoreDisplay
+          score={c.analysis.ai_match_score}
+          label="AI Match"
+          size={compact ? "sm" : "md"}
+        />
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -60,11 +70,16 @@ export function CandidateCard({ candidate, selected, onSelect, compact, actions 
 
           {!compact && (
             <div className="mt-2 flex flex-wrap gap-1">
-              {[...c.skills.programming_languages, ...c.skills.frameworks.slice(0, 3)].slice(0, 6).map((s) => (
-                <span key={s} className="rounded-md bg-muted/40 px-1.5 py-0.5 text-[9px] font-mono text-muted-foreground">
-                  {s}
-                </span>
-              ))}
+              {[...c.skills.programming_languages, ...c.skills.frameworks.slice(0, 3)]
+                .slice(0, 6)
+                .map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-md bg-muted/40 px-1.5 py-0.5 text-[9px] font-mono text-muted-foreground"
+                  >
+                    {s}
+                  </span>
+                ))}
             </div>
           )}
 
