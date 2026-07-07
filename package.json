@@ -1,0 +1,7 @@
+{
+  "name": "signal-scout-netlify-root",
+  "private": true,
+  "scripts": {
+    "dev:app": "npm --prefix \"Crazy Build\" run dev --"
+  }
+}
