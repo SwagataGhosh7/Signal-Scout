@@ -11,6 +11,7 @@ import {
   GoogleAuthProvider as GoogleAuthProviderClass,
   signInWithPopup,
   fetchSignInMethodsForEmail,
+  sendPasswordResetEmail,
   type AuthError as FirebaseAuthError,
 } from "firebase/auth";
 import {
@@ -274,13 +275,14 @@ function AuthPage() {
     }
 
     setFieldError(null);
+    const normalizedEmail = email.trim().toLowerCase();
 
     // 3. Firebase — create account
     let firebaseUid: string | null = null;
     let firebaseUser: import("firebase/auth").User | null = null;
     try {
-      console.log("[Firebase] Attempting createUserWithEmailAndPassword for:", email);
-      const cred = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      console.log("[Firebase] Attempting createUserWithEmailAndPassword for:", normalizedEmail);
+      const cred = await createUserWithEmailAndPassword(firebaseAuth, normalizedEmail, password);
       console.log("[Firebase] User created:", cred.user);
       firebaseUid = cred.user.uid;
       firebaseUser = cred.user;
@@ -297,9 +299,9 @@ function AuthPage() {
 
     // 4. Supabase — mirror account for database / RLS
     try {
-      console.log("[Supabase] Attempting signUp mirror for:", email);
+      console.log("[Supabase] Attempting signUp mirror for:", normalizedEmail);
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: normalizedEmail,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/app`,
@@ -360,13 +362,45 @@ function AuthPage() {
       const needsConfirmation = data?.user && !data.session && data.user.identities?.length === 0;
       const identityCreated = data?.user && data.user.identities && data.user.identities.length > 0;
 
-      if (needsConfirmation || (data?.user && !data?.session && identityCreated)) {
-        toast.success("Almost there!", {
-          description: "Please verify your email before signing in. Check your inbox.",
-          duration: 7000,
+      if (!data?.session) {
+        if (needsConfirmation || (data?.user && !data?.session && identityCreated)) {
+          toast.success("Almost there!", {
+            description: "Please verify your email before signing in. Check your inbox.",
+            duration: 7000,
+          });
+          console.log("[Auth] Email confirmation required.");
+          return;
+        }
+
+        console.warn("[Auth] Supabase signUp returned no session. Attempting immediate sign-in...");
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        console.log("[Auth] Email confirmation required.");
-        return;
+
+        console.log("[Supabase] signInWithPassword after signUp data:", signInData);
+        console.log("[Supabase] signInWithPassword after signUp error:", signInError);
+
+        if (signInError) {
+          if (signInError.message.toLowerCase().includes("email not confirmed")) {
+            const msg = "Please verify your email before signing in. Check your inbox.";
+            setFieldError(msg);
+            toast.error("Email not confirmed", { description: msg });
+            return;
+          }
+
+          setFieldError(signInError.message);
+          toast.error(signInError.message);
+          return;
+        }
+
+        if (!signInData?.session) {
+          const msg = "Account created, but no valid session could be established. Please try signing in again.";
+          console.error("[Auth] signInWithPassword after signUp returned no session:", signInData);
+          setFieldError(msg);
+          toast.error(msg);
+          return;
+        }
       }
 
       toast.success("Welcome to Signal Scout 🚀", {
@@ -419,58 +453,124 @@ function AuthPage() {
     }
 
     setFieldError(null);
+    const normalizedEmail = email.trim().toLowerCase();
 
-    // 3. Firebase sign-in
+    // 3. Supabase sign-in (primary auth source)
     try {
-      console.log("[Firebase] Attempting signInWithEmailAndPassword for:", email);
-      const cred = await signInWithEmailAndPassword(firebaseAuth, email, password);
-      console.log("[Firebase] Signed in:", cred.user);
-    } catch (firebaseErr: unknown) {
-      const msg = mapFirebaseError(firebaseErr);
-      console.error("[Firebase] signInWithEmailAndPassword error:", firebaseErr);
-      setFieldError(msg);
-      toast.error(msg);
-      return;
-    }
+      console.log("[Supabase] Attempting signInWithPassword for:", normalizedEmail);
+      let supabaseResult = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
+      console.log("[Supabase] signInWithPassword response data:", supabaseResult.data);
+      console.log("[Supabase] signInWithPassword response error:", supabaseResult.error);
 
-    // 4. Supabase sign-in
-    try {
-      console.log("[Supabase] Attempting signInWithPassword for:", email);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (supabaseResult.error) {
+        const errMsgLower = supabaseResult.error.message.toLowerCase();
 
-      console.log("[Supabase] signInWithPassword response data:", data);
-      console.log("[Supabase] signInWithPassword response error:", error);
-
-      if (error) {
-        // Account in Firebase but not mirrored in Supabase yet — auto-create mirror
-        if (
-          error.message.toLowerCase().includes("invalid login credentials") ||
-          error.message.toLowerCase().includes("invalid credentials")
-        ) {
-          console.warn("[Supabase] Account not mirrored. Creating Supabase mirror...");
-          const { data: signupData, error: signupErr } = await supabase.auth.signUp({
-            email,
-            password,
-            options: { data: { username: email.split("@")[0] } },
-          });
-          console.log("[Supabase] Mirror signUp data:", signupData);
-          console.log("[Supabase] Mirror signUp error:", signupErr);
-
-          if (signupErr && !signupErr.message.toLowerCase().includes("already")) {
-            setFieldError(signupErr.message);
-            toast.error(signupErr.message);
-            return;
-          }
-        } else if (error.message.toLowerCase().includes("email not confirmed")) {
+        if (errMsgLower.includes("email not confirmed")) {
           const msg = "Please verify your email before signing in. Check your inbox.";
           setFieldError(msg);
           toast.error("Email not confirmed", { description: msg });
           return;
+        }
+
+        if (
+          errMsgLower.includes("invalid login credentials") ||
+          errMsgLower.includes("invalid credentials") ||
+          errMsgLower.includes("user not found")
+        ) {
+          console.warn(
+            "[Auth] Supabase login failed; falling back to Firebase sign-in to recover or mirror the account.",
+          );
+
+          let firebaseUserCredential = null as Awaited<ReturnType<typeof signInWithEmailAndPassword>> | null;
+          try {
+            console.log("[Firebase] Attempting signInWithEmailAndPassword for:", email);
+            firebaseUserCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+            console.log("[Firebase] Signed in:", firebaseUserCredential.user);
+          } catch (firebaseErr: unknown) {
+            const msg = mapFirebaseError(firebaseErr);
+            console.error("[Firebase] signInWithEmailAndPassword error:", firebaseErr);
+
+            try {
+              const methods = await fetchSignInMethodsForEmail(firebaseAuth, email);
+              console.log("[Firebase] fetchSignInMethodsForEmail for", email, methods);
+              if (methods.length > 0 && !methods.includes("password")) {
+                const providerList = methods.join(", ");
+                const providerMsg =
+                  `This email is registered with ${providerList}. Please sign in using that provider.`;
+                setFieldError(providerMsg);
+                toast.error("Sign in method mismatch", { description: providerMsg, duration: 10000 });
+                return;
+              }
+            } catch (fetchErr) {
+              console.warn(
+                "[Firebase] fetchSignInMethodsForEmail failed while handling credential error:",
+                fetchErr,
+              );
+            }
+
+            setFieldError(msg);
+            toast.error(msg);
+            return;
+          }
+
+          console.log("[Auth] Firebase sign-in succeeded; ensuring Supabase mirror exists.");
+          const { data: mirrorData, error: mirrorError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { username: email.split("@")[0] } },
+          });
+
+          console.log("[Supabase] Mirror signUp data:", mirrorData);
+          console.log("[Supabase] Mirror signUp error:", mirrorError);
+
+          if (mirrorError && !mirrorError.message.toLowerCase().includes("already")) {
+            setFieldError(mirrorError.message);
+            toast.error(mirrorError.message);
+            return;
+          }
+
+          if (mirrorData?.session) {
+            supabaseResult = mirrorData;
+          } else {
+            const retrySignIn = await supabase.auth.signInWithPassword({ email, password });
+            console.log(
+              "[Supabase] Retry signInWithPassword after mirror creation data:",
+              retrySignIn.data,
+            );
+            console.log(
+              "[Supabase] Retry signInWithPassword after mirror creation error:",
+              retrySignIn.error,
+            );
+            if (retrySignIn.error) {
+              if (retrySignIn.error.message.toLowerCase().includes("email not confirmed")) {
+                const msg = "Please verify your email before signing in. Check your inbox.";
+                setFieldError(msg);
+                toast.error("Email not confirmed", { description: msg });
+                return;
+              }
+              setFieldError(retrySignIn.error.message);
+              toast.error(retrySignIn.error.message);
+              return;
+            }
+            supabaseResult = retrySignIn;
+          }
         } else {
-          setFieldError(error.message);
-          toast.error(error.message);
+          const msg =
+            supabaseResult.error.code === "invalid_credentials"
+              ? "Email or password is incorrect. If you just created your account, please verify your email or reset your password."
+              : supabaseResult.error.message;
+          setFieldError(msg);
+          toast.error(msg);
           return;
         }
+      }
+
+      if (!supabaseResult.data?.session) {
+        const msg = "Authentication could not establish a valid session. Please try again.";
+        console.error("[Auth] Sign-in did not return a valid session:", supabaseResult.data);
+        setFieldError(msg);
+        toast.error(msg);
+        return;
       }
 
       toast.success("Signal Scout activated ⚡", {
@@ -490,6 +590,72 @@ function AuthPage() {
       console.error("[Supabase] signInWithPassword unexpected error:", err);
       setFieldError(msg);
       toast.error(msg);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      const msg = "Please enter your email address first.";
+      setFieldError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      const msg = "Please enter a valid email address.";
+      setFieldError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log("[Auth] Initiating password reset for:", normalizedEmail);
+
+      try {
+        await sendPasswordResetEmail(firebaseAuth, normalizedEmail, {
+          url: `${window.location.origin}/auth`,
+        });
+        console.log("[Auth] Firebase password reset email sent successfully.");
+      } catch (firebaseResetErr: unknown) {
+        const firebaseError = firebaseResetErr as FirebaseAuthError;
+        console.error("[Auth] Firebase password reset failed:", firebaseResetErr);
+
+        if (firebaseError?.code === "auth/user-not-found") {
+          const msg = "No account was found for that email address.";
+          setFieldError(msg);
+          toast.error(msg);
+          return;
+        }
+
+        const msg = mapFirebaseError(firebaseResetErr);
+        setFieldError(msg);
+        toast.error(msg);
+        return;
+      }
+
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+          redirectTo: `${window.location.origin}/auth`,
+        });
+
+        if (error) {
+          console.error("[Supabase] Password reset request failed:", error);
+          toast.warning("Password reset requested", {
+            description: "A reset email was requested, but Supabase reported an issue. Please check your inbox or try again.",
+          });
+        }
+      } catch (supabaseResetErr) {
+        console.error("[Supabase] Password reset request threw:", supabaseResetErr);
+      }
+
+      toast.success("Password reset sent", {
+        description: "Check your inbox and spam folder for the reset link.",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1334,11 +1500,9 @@ function AuthPage() {
                         fontFamily: "inherit",
                         padding: 0,
                       }}
-                      onClick={() =>
-                        toast.info("Password reset", {
-                          description: "Enter your email and we'll send a reset link.",
-                        })
-                      }
+                      onClick={() => {
+                        void handlePasswordReset();
+                      }}
                     >
                       Forgot password?
                     </button>
