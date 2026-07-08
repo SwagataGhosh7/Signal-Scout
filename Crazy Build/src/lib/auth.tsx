@@ -69,11 +69,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Invalidate and navigate accordingly
       router.invalidate();
       if (event === "SIGNED_IN") {
-        console.log("[AuthProvider] SIGNED_IN -> navigating to /app");
-        router
-          .navigate({ to: "/app", replace: true })
-          .then((res) => console.log("[AuthProvider] AuthState SIGNED_IN navigation success:", res))
-          .catch((e) => console.warn("[AuthProvider] SIGNED_IN navigate error:", e));
+        const currentPath = router.state.location.pathname;
+        if (currentPath === "/auth" || currentPath === "/") {
+          console.log(`[AuthProvider] SIGNED_IN -> navigating to /app from ${currentPath}`);
+          router
+            .navigate({ to: "/app", replace: true })
+            .then((res) => console.log("[AuthProvider] AuthState SIGNED_IN navigation success:", res))
+            .catch((e) => console.warn("[AuthProvider] SIGNED_IN navigate error:", e));
+        } else {
+          console.log(`[AuthProvider] SIGNED_IN event fired, but staying on ${currentPath}`);
+        }
       }
       if (event === "SIGNED_OUT") {
         console.log("[AuthProvider] SIGNED_OUT -> navigating to /auth");

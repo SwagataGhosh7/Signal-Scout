@@ -147,11 +147,16 @@ function RootComponent() {
       console.log("[Debug Logs] ===============");
 
       if (session) {
-        console.log("[Root] Redirecting to /app immediately on startup...");
-        router
-          .navigate({ to: "/app", replace: true })
-          .then((res) => console.log("[Root] Startup redirect Navigation Result: success", res))
-          .catch((err) => console.error("[Root] Startup redirect Navigation Result: failed", err));
+        const currentPath = routerState.location.pathname;
+        if (currentPath === "/" || currentPath === "/auth") {
+          console.log(`[Root] Redirecting to /app immediately on startup from ${currentPath}...`);
+          router
+            .navigate({ to: "/app", replace: true })
+            .then((res) => console.log("[Root] Startup redirect Navigation Result: success", res))
+            .catch((err) => console.error("[Root] Startup redirect Navigation Result: failed", err));
+        } else {
+          console.log(`[Root] Startup session found, staying on ${currentPath}`);
+        }
       }
     };
     checkStartupAuth();
