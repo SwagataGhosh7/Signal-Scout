@@ -30,6 +30,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -530,7 +531,7 @@ function AuthPage() {
           }
 
           if (mirrorData?.session) {
-            supabaseResult = mirrorData;
+            supabaseResult = { data: mirrorData as any, error: null };
           } else {
             const retrySignIn = await supabase.auth.signInWithPassword({ email, password });
             console.log(
@@ -1003,6 +1004,11 @@ function AuthPage() {
           overflow: "hidden",
         }}
       >
+        {/* Theme Toggle */}
+        <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem", zIndex: 50 }}>
+          <ThemeToggle />
+        </div>
+
         {/* Background glow + grid */}
         <div
           aria-hidden
