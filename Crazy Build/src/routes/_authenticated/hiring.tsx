@@ -486,7 +486,7 @@ function HiringPage() {
         <DepthLayer className="rounded-2xl p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-sm font-semibold">AI Copilot</h2>
+              <h2 className="text-sm font-semibold">AI Awgataot</h2>
               <p className="text-xs text-muted-foreground">
                 Ask the recruiter assistant for ranking, comparisons, interview plans, or resume
                 summaries.
