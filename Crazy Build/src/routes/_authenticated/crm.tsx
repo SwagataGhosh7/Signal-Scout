@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listLeads, updateLeadStatus } from "@/lib/signals.functions";
-import { crmStatus } from "@/lib/crm.functions";
+import { crmStatus, hubspotConnect } from "@/lib/crm.functions";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -85,6 +85,7 @@ function CrmPage() {
   const qc = useQueryClient();
   const leadsFn = useServerFn(listLeads);
   const statusFn = useServerFn(crmStatus);
+  const connectHubspotFn = useServerFn(hubspotConnect);
   const updateStatusFn = useServerFn(updateLeadStatus);
 
   const leadsQ = useSuspenseQuery({ queryKey: ["leads"], queryFn: () => leadsFn() });
@@ -110,11 +111,23 @@ function CrmPage() {
     },
   });
 
-  const toggleConnection = (id: string) => {
-    if (id === "hubspot" && crmQ.data.connected) {
-      toast.info("HubSpot is configured in env variables.");
+  const toggleConnection = async (id: string) => {
+    if (id === "hubspot") {
+      if (crmQ.data.connected) {
+        toast.info("HubSpot is already connected.");
+        return;
+      }
+
+      try {
+        const result = await connectHubspotFn({ data: { redirectUri: window.location.origin + "/hubspot/callback" } });
+        window.location.assign(result.url);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unable to start HubSpot OAuth.";
+        toast.error(message);
+      }
       return;
     }
+
     const next = !integrations[id];
     setIntegrations({ ...integrations, [id]: next });
     if (next) {
@@ -295,14 +308,14 @@ function CrmPage() {
                 </div>
                 <div className="mt-6 flex gap-2">
                   <button
-                    onClick={() => toggleConnection(c.id)}
+                    onClick={() => void toggleConnection(c.id)}
                     className={`w-full rounded-md px-3 py-2 text-xs font-semibold transition ${
                       connected
                         ? "border border-destructive/40 text-destructive bg-destructive/5 hover:bg-destructive/15"
                         : "bg-primary text-primary-foreground hover:opacity-90"
                     }`}
                   >
-                    {connected ? "Disconnect" : "Configure Connector"}
+                    {connected ? "Disconnect" : c.id === "hubspot" ? "Connect HubSpot" : "Configure Connector"}
                   </button>
                 </div>
               </div>

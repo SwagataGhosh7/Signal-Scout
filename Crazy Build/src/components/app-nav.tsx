@@ -156,7 +156,7 @@ export function AppNav() {
           <div className="mx-2 my-2 p-2.5 rounded-xl border border-primary/20 bg-primary/5 text-xs text-muted-foreground flex flex-col gap-1.5">
             <div className="flex items-center gap-1.5 text-primary font-medium">
               <Sparkles className="h-3 w-3" />
-              <span>Agentic Co-Pilot</span>
+              <span>Awagatabot</span>
             </div>
             <p className="text-[10px] leading-relaxed">
               AI Agents are scanning targets. Tap the bubble to talk.
