@@ -4,9 +4,13 @@ import { useTheme } from "./theme-provider";
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
+  const isDark = 
+    theme === "dark" || 
+    (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className="relative grid h-9 w-9 place-items-center rounded-md border border-border bg-card/50 text-muted-foreground backdrop-blur transition-all hover:bg-accent hover:text-foreground hover:glow"
       aria-label="Toggle theme"
     >

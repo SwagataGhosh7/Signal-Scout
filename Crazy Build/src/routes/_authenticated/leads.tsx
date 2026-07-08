@@ -19,6 +19,8 @@ import {
 import { toast } from "sonner";
 import { TiltCard } from "@/components/depth-system";
 import { UrgencyBadge, Badge } from "./app";
+import { HackathonLeadGenTrigger } from "@/components/LeadGenTrigger";
+import { LeadProfileCards } from "@/components/LeadProfileCards";
 
 const STATUSES = ["new", "contacted", "qualified", "won", "lost"] as const;
 
@@ -90,6 +92,8 @@ function LeadsPage() {
 
   return (
     <div className="space-y-6">
+      <HackathonLeadGenTrigger />
+      <LeadProfileCards />
       <div className="flex flex-col gap-3 md:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-[11px] md:text-xs uppercase tracking-widest text-primary font-semibold">
