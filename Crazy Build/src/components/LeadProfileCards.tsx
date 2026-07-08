@@ -14,9 +14,21 @@ export function LeadProfileCards() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedLeads = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...(doc.data() as any)
       }));
-      setLeads(fetchedLeads);
+
+      // Deduplicate leads by name
+      const uniqueLeadsMap = new Map();
+      fetchedLeads.forEach(lead => {
+        const nameKey = (lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`).trim().toLowerCase();
+        if (nameKey && !uniqueLeadsMap.has(nameKey)) {
+          uniqueLeadsMap.set(nameKey, lead);
+        } else if (!nameKey && !uniqueLeadsMap.has(lead.id)) {
+          uniqueLeadsMap.set(lead.id, lead);
+        }
+      });
+
+      setLeads(Array.from(uniqueLeadsMap.values()));
       setLoading(false);
     });
 
@@ -75,7 +87,12 @@ export function LeadProfileCards() {
                     <h3 className="text-xl font-bold text-foreground">{lead.full_name}</h3>
                     <p className="text-primary font-medium text-sm mt-0.5">{lead.headline}</p>
                   </div>
-                  <a href={lead.linkedin_url} target="_blank" rel="noreferrer" className="p-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-md transition-colors">
+                  <a 
+                    href={lead.linkedin_url?.startsWith('http') ? lead.linkedin_url : `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(((lead.full_name || '') + ' ' + (lead.company_name || '')).trim())}`} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="p-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-md transition-colors"
+                  >
                     <Linkedin className="h-5 w-5" />
                   </a>
                 </div>

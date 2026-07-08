@@ -40,11 +40,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session.user);
         setLoading(false);
         console.log("[AuthProvider] initial session:", session);
-        console.log("[AuthProvider] Session exists on startup -> navigating to /app");
-        router
-          .navigate({ to: "/app", replace: true })
-          .then((res) => console.log("[AuthProvider] Startup redirect navigation success:", res))
-          .catch((e) => console.warn("[AuthProvider] Startup redirect navigation failed:", e));
+        const currentPath = router.state.location.pathname;
+        if (currentPath === "/auth" || currentPath === "/") {
+          console.log(`[AuthProvider] Session exists on startup -> navigating to /app from ${currentPath}`);
+          router
+            .navigate({ to: "/app", replace: true })
+            .then((res) => console.log("[AuthProvider] Startup redirect navigation success:", res))
+            .catch((e) => console.warn("[AuthProvider] Startup redirect navigation failed:", e));
+        } else {
+          console.log(`[AuthProvider] Session exists on startup, staying on ${currentPath}`);
+        }
       } else {
         setSession(null);
         setUser(null);
