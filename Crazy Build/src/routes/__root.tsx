@@ -176,22 +176,24 @@ function RootComponent() {
   }, [routerState]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="signal-scout-theme">
-        <AuthProvider>
-          <Suspense
-            fallback={
-              <div className="flex min-h-screen items-center justify-center bg-background">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            }
-          >
-            <Outlet />
-          </Suspense>
-          <Toaster theme="dark" position="top-right" richColors />
-          <CommandPalette />
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <RootShell>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="dark" storageKey="signal-scout-theme">
+          <AuthProvider>
+            <Suspense
+              fallback={
+                <div className="flex min-h-screen items-center justify-center bg-background">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
+            <Toaster theme="dark" position="top-right" richColors />
+            <CommandPalette />
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </RootShell>
   );
 }

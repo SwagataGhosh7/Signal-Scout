@@ -38,6 +38,9 @@ import {
   Zap,
 } from "lucide-react";
 import { DepthLayer, TiltCard, ParallaxField } from "@/components/depth-system";
+import { useState, useRef } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { processResume } from "@/lib/resume.functions";
 
 export const Route = createFileRoute("/_authenticated/hiring")({
   component: HiringPage,
@@ -139,6 +142,44 @@ const hiringTrend = [
 ];
 
 function HiringPage() {
+  const [isUploading, setIsUploading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const processResumeFn = useServerFn(processResume);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const base64String = (e.target?.result as string).split(',')[1];
+        const result = await processResumeFn({
+          data: {
+            fileName: file.name,
+            fileType: file.type,
+            fileData: base64String
+          }
+        });
+
+        if (result.success) {
+          setAnalysisResult(result.analysis);
+        } else {
+          alert("Error analyzing resume: " + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to upload resume.");
+      } finally {
+        setIsUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -347,39 +388,76 @@ function HiringPage() {
               <div>
                 <h2 className="text-sm font-semibold">Resume Intelligence</h2>
                 <p className="text-xs text-muted-foreground">
-                  Upload a PDF or DOCX to extract, summarize, and compare against the role.
+                  Upload a PDF or TXT to extract, summarize, and compare against the role.
                 </p>
               </div>
-              <button className="rounded-full border border-border bg-background/50 px-3 py-1 text-[11px] text-muted-foreground transition hover:bg-accent">
-                Upload Resume
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload} 
+                accept=".pdf,.txt" 
+                className="hidden" 
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="rounded-full border border-border bg-background/50 px-3 py-1 text-[11px] text-muted-foreground transition hover:bg-accent disabled:opacity-50"
+              >
+                {isUploading ? "Analyzing..." : "Upload Resume"}
               </button>
             </div>
 
-            <div className="rounded-xl border border-dashed border-border/70 bg-background/50 p-4 text-center text-sm text-muted-foreground">
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="cursor-pointer rounded-xl border border-dashed border-border/70 bg-background/50 p-4 text-center text-sm text-muted-foreground transition hover:bg-accent/50"
+            >
               <FileText className="mx-auto mb-2 h-6 w-6 text-primary" />
-              Drag a resume here or use the upload action to extract insights instantly.
+              {isUploading ? "Extracting insights..." : "Click or drag a resume here to extract insights instantly."}
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-xl border border-border/70 bg-background/50 p-3">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Summary
+            {analysisResult ? (
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-xl border border-border/70 bg-background/50 p-3">
+                  <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    <span>Summary</span>
+                    <span className="text-primary font-bold">Score: {analysisResult.overall_score}/100</span>
+                  </div>
+                  <p className="mt-2 text-sm text-foreground">
+                    {analysisResult.summary}
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-foreground">
-                  Strong product engineering profile with leadership, stable delivery history, and
-                  proven ML experimentation.
-                </p>
-              </div>
-              <div className="rounded-xl border border-border/70 bg-background/50 p-3">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Missing Skills
+                <div className="rounded-xl border border-border/70 bg-background/50 p-3">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Missing Skills & Feedback
+                  </div>
+                  <p className="mt-2 text-sm text-foreground">
+                    {analysisResult.missing_skills?.length ? analysisResult.missing_skills.join(", ") : "None identified."}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {analysisResult.critical_feedback?.length ? analysisResult.critical_feedback[0] : ""}
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-foreground">
-                  Fine-tune on distributed systems, search ranking, and enterprise deployment
-                  experience.
-                </p>
               </div>
-            </div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-xl border border-border/70 bg-background/50 p-3 opacity-50 grayscale">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Summary
+                  </div>
+                  <p className="mt-2 text-sm text-foreground">
+                    Upload a resume to see AI-generated summary and role fit analysis.
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-background/50 p-3 opacity-50 grayscale">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Missing Skills
+                  </div>
+                  <p className="mt-2 text-sm text-foreground">
+                    Upload a resume to identify skill gaps and areas for growth.
+                  </p>
+                </div>
+              </div>
+            )}
           </DepthLayer>
 
           <DepthLayer className="rounded-2xl p-5 space-y-4">

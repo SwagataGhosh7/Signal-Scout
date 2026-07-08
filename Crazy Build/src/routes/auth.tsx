@@ -144,6 +144,7 @@ function SignalDot({ style }: { style: React.CSSProperties }) {
         boxShadow:
           "0 0 10px 2px color-mix(in srgb, var(--color-primary) calc(0.5 * 100%), transparent)",
         animation: "floatDot 6s ease-in-out infinite",
+        pointerEvents: "none",
         ...style,
       }}
     />
@@ -964,9 +965,15 @@ function AuthPage() {
           box-shadow: 0 0 24px -4px color-mix(in srgb, var(--color-primary) calc(0.45 * 100%), transparent);
           transition: opacity 0.2s ease, transform 0.15s ease;
           font-family: inherit;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+          position: relative;
+          z-index: 1;
         }
-        .auth-btn-primary:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-        .auth-btn-primary:active:not(:disabled) { transform: translateY(0); }
+          @media (hover: hover) {
+            .auth-btn-primary:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+          }
+        .auth-btn-primary:active:not(:disabled) { transform: translateY(0); opacity: 0.85; }
         .auth-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .auth-btn-google {
@@ -985,12 +992,19 @@ function AuthPage() {
           cursor: pointer;
           transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
           font-family: inherit;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+          position: relative;
+          z-index: 1;
         }
-        .auth-btn-google:hover:not(:disabled) {
-          background: var(--color-background);
-          border-color: color-mix(in srgb, var(--color-primary) calc(0.4 * 100%), transparent);
-          transform: translateY(-1px);
-        }
+          @media (hover: hover) {
+            .auth-btn-google:hover:not(:disabled) {
+              background: var(--color-background);
+              border-color: color-mix(in srgb, var(--color-primary) calc(0.4 * 100%), transparent);
+              transform: translateY(-1px);
+            }
+          }
+        .auth-btn-google:active:not(:disabled) { opacity: 0.85; }
         .auth-btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
 
         @media (max-width: 768px) { .auth-left { display: none !important; } }
@@ -1002,7 +1016,6 @@ function AuthPage() {
           display: "flex",
           background: "var(--color-background)",
           position: "relative",
-          overflow: "hidden",
         }}
       >
         {/* Theme Toggle */}
@@ -1229,7 +1242,7 @@ function AuthPage() {
             justifyContent: "center",
             padding: "2rem",
             position: "relative",
-            zIndex: 1,
+            zIndex: 2,
           }}
         >
           <div
@@ -1244,6 +1257,8 @@ function AuthPage() {
               padding: "2.5rem",
               boxShadow:
                 "0 0 60px -12px oklch(0.72 0.19 210 / 0.25), 0 32px 64px -24px oklch(0 0 0 / 0.5)",
+              position: "relative",
+              zIndex: 2,
             }}
           >
             {/* Tab switcher */}
@@ -1260,6 +1275,7 @@ function AuthPage() {
               {(["signin", "signup"] as const).map((m) => (
                 <button
                   key={m}
+                  type="button"
                   onClick={() => {
                     resetForm();
                     setMode(m);
@@ -1285,6 +1301,8 @@ function AuthPage() {
                         ? "0 0 16px -4px color-mix(in srgb, var(--color-primary) calc(0.5 * 100%), transparent)"
                         : "none",
                     fontFamily: "inherit",
+                    touchAction: "manipulation",
+                    WebkitTapHighlightColor: "transparent",
                   }}
                 >
                   {m === "signin" ? "Sign in" : "Create account"}
@@ -1577,6 +1595,9 @@ function AuthPage() {
                       display: "grid",
                       placeItems: "center",
                       padding: 4,
+                      touchAction: "manipulation",
+                      WebkitTapHighlightColor: "transparent",
+                      zIndex: 2,
                     }}
                   >
                     {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -1663,6 +1684,7 @@ function AuthPage() {
               )}
               <button
                 id="auth-switch-mode-btn"
+                type="button"
                 onClick={switchMode}
                 disabled={anyLoading}
                 style={{
@@ -1673,6 +1695,9 @@ function AuthPage() {
                   cursor: "pointer",
                   transition: "color 0.2s ease",
                   fontFamily: "inherit",
+                  touchAction: "manipulation",
+                  WebkitTapHighlightColor: "transparent",
+                  padding: "8px 0",
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.color = "var(--color-primary)";
