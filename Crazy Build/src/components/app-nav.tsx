@@ -70,7 +70,7 @@ export function AppNav() {
       >
         {/* Brand */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-border/40">
-          <Link to="/app" className="flex items-center gap-2 overflow-hidden">
+          <Link to="/" className="flex items-center gap-2 overflow-hidden">
             <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary glow">
               <Radar className="h-4 w-4 animate-pulse" />
             </div>
@@ -204,7 +204,7 @@ export function AppNav() {
         className="md:hidden flex flex-col w-full bg-card/40 backdrop-blur sticky top-0 z-20 border-b border-border/60"
       >
         <div className="flex h-12 items-center justify-between px-3">
-          <Link to="/app" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="grid h-8 w-8 place-items-center rounded-md bg-primary/15 text-primary">
               <Radar className="h-4 w-4 animate-pulse" />
             </div>
