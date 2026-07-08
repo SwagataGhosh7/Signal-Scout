@@ -25,7 +25,7 @@ export const crmStatus = createServerFn({ method: "GET" }).handler(async () => {
  */
 export const syncLeadToCrm = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ lead_id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ lead_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const headers = crmHeaders();
     if (!headers) return { skipped: true, reason: "crm_not_connected" as const };

@@ -47,7 +47,7 @@ export const listTargets = createServerFn({ method: "GET" })
 
 export const addTarget = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         company_name: z.string().min(1).max(120),
@@ -75,7 +75,7 @@ export const addTarget = createServerFn({ method: "POST" })
 
 export const deleteTarget = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("targets").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -110,7 +110,7 @@ export const listLeads = createServerFn({ method: "GET" })
 
 export const updateLeadStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         id: z.string().uuid(),
@@ -146,7 +146,7 @@ const SignalSchema = z.object({
 
 export const harvestSignals = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ target_id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ target_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     // Load target
     const { data: target, error: tErr } = await context.supabase
@@ -254,7 +254,7 @@ const OutreachSchema = z.object({
 
 export const generateOutreach = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ lead_id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ lead_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: lead } = await context.supabase
       .from("leads")
@@ -355,7 +355,7 @@ const REPORT_TEMPLATE_TYPES: Record<string, string> = {
 
 export const fetchReportData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ template: z.string().min(1) }).parse(input))
+  .validator((input: unknown) => z.object({ template: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
     const [targetsRes, signalsRes, leadsRes, draftsRes] = await Promise.all([
       context.supabase
@@ -481,7 +481,7 @@ export const fetchReportData = createServerFn({ method: "POST" })
 
 export const generateReportSummary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         payload: z
@@ -515,7 +515,7 @@ function fallbackSummary(payload: { title: string; stats: Record<string, string 
 
 export const saveReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         title: z.string().min(1),
@@ -569,7 +569,7 @@ export const listReports = createServerFn({ method: "GET" })
 
 export const deleteReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("reports")
