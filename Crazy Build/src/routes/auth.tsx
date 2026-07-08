@@ -1006,10 +1006,15 @@ function AuthPage() {
         }}
       >
         {/* Theme Toggle */}
-        <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem", zIndex: 50 }}>
+        <div style={{ 
+          position: "absolute", 
+          top: "max(1.5rem, env(safe-area-inset-top, 1.5rem))", 
+          right: "max(1.5rem, env(safe-area-inset-right, 1.5rem))", 
+          zIndex: 9999, // Super high z-index to ensure it's on top of everything
+          padding: "0.5rem" // Increase touch target size
+        }}>
           <ThemeToggle />
         </div>
-
         {/* Background glow + grid */}
         <div
           aria-hidden
