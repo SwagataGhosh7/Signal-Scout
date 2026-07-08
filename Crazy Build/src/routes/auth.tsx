@@ -1322,7 +1322,7 @@ function AuthPage() {
               aria-label="Continue with Google"
             >
               {googleLoading ? <Spinner /> : <GoogleIcon />}
-              {googleLoading ? "Connecting to Google…" : "Continue with Google"}
+              {googleLoading ? "Connecting to Google…" : mode === "signin" ? "Sign in with Google" : "Sign up with Google"}
             </button>
 
             {/* Divider */}

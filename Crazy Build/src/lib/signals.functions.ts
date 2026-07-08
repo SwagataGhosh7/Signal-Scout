@@ -91,7 +91,7 @@ export const listSignals = createServerFn({ method: "GET" })
       .from("signals")
       .select("*")
       .order("detected_at", { ascending: false })
-      .limit(200);
+      .limit(10);
     if (error) throw new Error(error.message);
     return data ?? [];
   });
@@ -103,7 +103,7 @@ export const listLeads = createServerFn({ method: "GET" })
       .from("leads")
       .select("*")
       .order("score", { ascending: false })
-      .limit(200);
+      .limit(10);
     if (error) throw new Error(error.message);
     return data ?? [];
   });
@@ -338,7 +338,7 @@ export const listDrafts = createServerFn({ method: "GET" })
       .from("outreach_drafts")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(10);
     if (error) throw new Error(error.message);
     return data ?? [];
   });
@@ -366,17 +366,17 @@ export const fetchReportData = createServerFn({ method: "POST" })
         .from("signals")
         .select("id, title, summary, signal_type, source, intent, detected_at, target_id")
         .order("detected_at", { ascending: false })
-        .limit(200),
+        .limit(10),
       context.supabase
         .from("leads")
         .select("id, title, score, urgency, intent, status, created_at, target_id")
         .order("score", { ascending: false })
-        .limit(200),
+        .limit(10),
       context.supabase
         .from("outreach_drafts")
         .select("id, subject, channel, created_at, lead_id")
         .order("created_at", { ascending: false })
-        .limit(200),
+        .limit(10),
     ]);
 
     if (targetsRes.error) throw new Error(targetsRes.error.message);
