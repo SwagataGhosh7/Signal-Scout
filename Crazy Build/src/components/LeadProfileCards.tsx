@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, writeBatch, getDocs } from 'firebase/firestore';
 import { firebaseDb } from '@/lib/firebase';
-import { Building2, Briefcase, GraduationCap, MapPin, Mail, Linkedin, Users, Calendar } from 'lucide-react';
+import { Building2, Briefcase, GraduationCap, MapPin, Mail, Linkedin, Users, Calendar, Trash2 } from 'lucide-react';
 
 export function LeadProfileCards() {
   const [leads, setLeads] = useState<any[]>([]);
@@ -23,6 +23,17 @@ export function LeadProfileCards() {
     return () => unsubscribe();
   }, []);
 
+  const clearLeads = async () => {
+    if (!window.confirm('Are you sure you want to clear all mock leads?')) return;
+    const batch = writeBatch(firebaseDb);
+    const q = query(collection(firebaseDb, 'pipedream_leads'));
+    const snapshot = await getDocs(q);
+    snapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+  };
+
   if (loading) {
     return <div className="animate-pulse text-center text-muted-foreground p-8">Loading Real-Time Profiles...</div>;
   }
@@ -33,10 +44,19 @@ export function LeadProfileCards() {
 
   return (
     <div className="space-y-6 mt-8">
-      <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-        <Users className="h-6 w-6 text-primary" />
-        Enriched Profiles ({leads.length})
-      </h2>
+      <div className="flex items-center justify-between border-b border-border/50 pb-4">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <Users className="h-6 w-6 text-primary" />
+          Enriched Profiles ({leads.length})
+        </h2>
+        <button 
+          onClick={clearLeads}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors font-medium border border-destructive/20"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          Clear Data
+        </button>
+      </div>
       
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {leads.map((lead) => (
