@@ -24,6 +24,8 @@ export function HackathonLeadGenTrigger() {
         return;
       }
 
+      const isDemoMode = realLeads.some((l: any) => l.is_demo);
+
       const leadsRef = collection(firebaseDb, "pipedream_leads");
       
       let addedCount = 0;
@@ -32,7 +34,13 @@ export function HackathonLeadGenTrigger() {
         addedCount++;
       }
 
-      toast.success(`Successfully injected ${addedCount} real profiles from LinkedIn!`);
+      if (isDemoMode) {
+        toast.warning(
+          `⚠️ Demo mode: Google Custom Search API is not ready yet. Showing ${addedCount} sample profiles. Your API/billing setup will be retried automatically.`
+        );
+      } else {
+        toast.success(`Successfully injected ${addedCount} real profiles from LinkedIn!`);
+      }
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Network error triggering pipeline.");
