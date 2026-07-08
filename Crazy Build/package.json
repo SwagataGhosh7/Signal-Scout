@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "deploy": "npx netlify-cli deploy --build --prod"
+    "deploy": "npx cross-env NITRO_PRESET=netlify netlify-cli deploy --build --prod"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.5",
