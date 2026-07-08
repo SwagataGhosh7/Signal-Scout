@@ -100,7 +100,10 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     }
 
     if (!data.claims.sub) {
-      console.error("[Supabase Auth Middleware] Token verified but missing user ID claim.", data.claims);
+      console.error(
+        "[Supabase Auth Middleware] Token verified but missing user ID claim.",
+        data.claims,
+      );
       throw new Error("Unauthorized: No user ID found in token");
     }
 

@@ -153,7 +153,9 @@ function RootComponent() {
           router
             .navigate({ to: "/app", replace: true })
             .then((res) => console.log("[Root] Startup redirect Navigation Result: success", res))
-            .catch((err) => console.error("[Root] Startup redirect Navigation Result: failed", err));
+            .catch((err) =>
+              console.error("[Root] Startup redirect Navigation Result: failed", err),
+            );
         } else {
           console.log(`[Root] Startup session found, staying on ${currentPath}`);
         }

@@ -42,7 +42,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("[AuthProvider] initial session:", session);
         const currentPath = router.state.location.pathname;
         if (currentPath === "/auth" || currentPath === "/") {
-          console.log(`[AuthProvider] Session exists on startup -> navigating to /app from ${currentPath}`);
+          console.log(
+            `[AuthProvider] Session exists on startup -> navigating to /app from ${currentPath}`,
+          );
           router
             .navigate({ to: "/app", replace: true })
             .then((res) => console.log("[AuthProvider] Startup redirect navigation success:", res))
@@ -74,7 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log(`[AuthProvider] SIGNED_IN -> navigating to /app from ${currentPath}`);
           router
             .navigate({ to: "/app", replace: true })
-            .then((res) => console.log("[AuthProvider] AuthState SIGNED_IN navigation success:", res))
+            .then((res) =>
+              console.log("[AuthProvider] AuthState SIGNED_IN navigation success:", res),
+            )
             .catch((e) => console.warn("[AuthProvider] SIGNED_IN navigate error:", e));
         } else {
           console.log(`[AuthProvider] SIGNED_IN event fired, but staying on ${currentPath}`);

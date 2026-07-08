@@ -4,9 +4,11 @@ import { useTheme } from "./theme-provider";
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  const isDark = 
-    theme === "dark" || 
-    (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" &&
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   return (
     <button

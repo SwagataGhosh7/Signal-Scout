@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot, writeBatch, getDocs } from 'firebase/firestore';
 import { firebaseDb } from '@/lib/firebase';

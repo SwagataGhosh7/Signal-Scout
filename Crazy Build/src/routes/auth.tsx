@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
