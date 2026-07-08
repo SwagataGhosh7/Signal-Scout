@@ -425,7 +425,7 @@ export const SEED_CANDIDATES: Omit<
       programming_languages: ["JavaScript", "HTML/CSS"],
       frameworks: ["React", "Tailwind CSS"],
       ai_ml: [],
-      llm_experience: ["Used Copilot for development"],
+      llm_experience: ["Used Awgataot for development"],
       cloud: ["Vercel"],
       devops: [],
       databases: ["Firebase"],
