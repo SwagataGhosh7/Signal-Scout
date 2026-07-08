@@ -56,10 +56,8 @@ export const crmStatus = createServerFn({ method: "GET" }).handler(async () => {
 });
 
 export const hubspotConnect = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) =>
-    z
-      .object({ redirectUri: z.string().url().optional() })
-      .parse(input),
+  .validator(
+    z.object({ redirectUri: z.string().url().optional() })
   )
   .handler(async ({ data }) => {
     const { clientId } = getHubspotClientConfig(data.redirectUri);
@@ -81,9 +79,9 @@ export const hubspotConnect = createServerFn({ method: "POST" })
   });
 
 export const exchangeHubspotCode = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ code: z.string(), state: z.string().optional() }).parse(input))
+  .validator(z.object({ code: z.string(), state: z.string().optional() }))
   .handler(async ({ data }) => {
-    const { clientId, clientSecret, redirectUri } = getHubspotClientConfig(data.redirectUri);
+    const { clientId, clientSecret, redirectUri } = getHubspotClientConfig();
     if (!clientId || !clientSecret) {
       return { connected: false, error: "HUBSPOT_CLIENT_ID or HUBSPOT_CLIENT_SECRET is not configured." };
     }
