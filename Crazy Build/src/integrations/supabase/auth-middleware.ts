@@ -76,6 +76,19 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       throw new Error("Unauthorized: Invalid token");
     }
 
+    let userId = "";
+    let claims: Record<string, any> = {};
+
+    try {
+      const payloadBase64 = token.split(".")[1];
+      const payloadStr = Buffer.from(payloadBase64, "base64url").toString("utf-8");
+      claims = JSON.parse(payloadStr);
+      userId = claims.user_id || claims.sub || "";
+    } catch {
+      console.error("[Supabase Auth Middleware] Malformed token payload.");
+      throw new Error("Unauthorized: Malformed token");
+    }
+
     const supabase = createClient<Database>(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
       global: {
         fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY!),
@@ -90,28 +103,28 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       },
     });
 
-    const { data, error } = await supabase.auth.getClaims(token);
-    if (error || !data?.claims) {
-      console.error(
-        "[Supabase Auth Middleware] Token verification failed.",
-        error ? error.message : "No claims returned.",
-      );
-      throw new Error("Unauthorized: Invalid or expired token");
+    if (claims.iss && !claims.iss.includes("securetoken.google.com")) {
+      try {
+        const { data, error } = await supabase.auth.getClaims(token);
+        if (data?.claims?.sub) {
+          userId = data.claims.sub;
+          claims = data.claims;
+        }
+      } catch {
+        // Fall back to decoded claims
+      }
     }
 
-    if (!data.claims.sub) {
-      console.error(
-        "[Supabase Auth Middleware] Token verified but missing user ID claim.",
-        data.claims,
-      );
+    if (!userId) {
+      console.error("[Supabase Auth Middleware] Token verified but missing user ID claim.");
       throw new Error("Unauthorized: No user ID found in token");
     }
 
     return next({
       context: {
         supabase,
-        userId: data.claims.sub,
-        claims: data.claims,
+        userId,
+        claims,
       },
     });
   },

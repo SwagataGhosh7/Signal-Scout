@@ -59,21 +59,21 @@ function Dashboard() {
   const signals = useSuspenseQuery({ queryKey: ["signals"], queryFn: () => signalsFn() });
   const targets = useSuspenseQuery({ queryKey: ["targets"], queryFn: () => targetsFn() });
 
-  const s = stats.data;
-  const topLeads = leads.data.slice(0, 5);
-  const recentSignals = signals.data.slice(0, 5);
+  const s = stats.data || { targets: 0, signals: 0, leads: 0, drafts: 0, avgScore: 78, highUrgency: 0, byIntent: {} };
+  const topLeads = (leads.data || []).slice(0, 5);
+  const recentSignals = (signals.data || []).slice(0, 5);
 
   // Compute stats details
-  const totalCompanies = targets.data.length;
+  const totalCompanies = (targets.data || []).length;
   const signalsToday =
-    signals.data.filter((x) => new Date(x.detected_at).toDateString() === new Date().toDateString())
+    (signals.data || []).filter((x) => new Date(x.detected_at).toDateString() === new Date().toDateString())
       .length || 8; // fallback to 8 for presentation if none harvested today
 
-  const hotOpportunities = leads.data.filter((x) => x.score >= 80).length;
+  const hotOpportunities = (leads.data || []).filter((x) => x.score >= 80).length;
   const aiIntentScore = s.avgScore || 78;
-  const qualifiedLeads = leads.data.filter((x) => x.status === "qualified").length;
-  const emailsGenerated = s.drafts;
-  const crmSyncedCount = leads.data.filter((x) => x.status !== "new").length;
+  const qualifiedLeads = (leads.data || []).filter((x) => x.status === "qualified").length;
+  const emailsGenerated = s.drafts || 0;
+  const crmSyncedCount = (leads.data || []).filter((x) => x.status !== "new").length;
 
   // Chart data
   const signalTrendData = [
@@ -87,7 +87,7 @@ function Dashboard() {
   ];
 
   const industryData = Object.entries(
-    targets.data.reduce<Record<string, number>>((acc, t) => {
+    (targets.data || []).reduce<Record<string, number>>((acc, t) => {
       const ind = t.industry || "Software";
       acc[ind] = (acc[ind] || 0) + 1;
       return acc;

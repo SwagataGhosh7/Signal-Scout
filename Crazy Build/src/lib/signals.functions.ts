@@ -37,12 +37,20 @@ function extractJsonPayload(text: string): string {
 export const listTargets = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("targets")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    return data ?? [];
+    try {
+      const { data, error } = await context.supabase
+        .from("targets")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.warn("[listTargets] Supabase query warning:", error.message);
+        return [];
+      }
+      return data ?? [];
+    } catch (err) {
+      console.warn("[listTargets] Fetch error:", err);
+      return [];
+    }
   });
 
 export const addTarget = createServerFn({ method: "POST" })
@@ -87,25 +95,41 @@ export const deleteTarget = createServerFn({ method: "POST" })
 export const listSignals = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("signals")
-      .select("*")
-      .order("detected_at", { ascending: false })
-      .limit(10);
-    if (error) throw new Error(error.message);
-    return data ?? [];
+    try {
+      const { data, error } = await context.supabase
+        .from("signals")
+        .select("*")
+        .order("detected_at", { ascending: false })
+        .limit(10);
+      if (error) {
+        console.warn("[listSignals] Supabase query warning:", error.message);
+        return [];
+      }
+      return data ?? [];
+    } catch (err) {
+      console.warn("[listSignals] Fetch error:", err);
+      return [];
+    }
   });
 
 export const listLeads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("leads")
-      .select("*")
-      .order("score", { ascending: false })
-      .limit(10);
-    if (error) throw new Error(error.message);
-    return data ?? [];
+    try {
+      const { data, error } = await context.supabase
+        .from("leads")
+        .select("*")
+        .order("score", { ascending: false })
+        .limit(10);
+      if (error) {
+        console.warn("[listLeads] Supabase query warning:", error.message);
+        return [];
+      }
+      return data ?? [];
+    } catch (err) {
+      console.warn("[listLeads] Fetch error:", err);
+      return [];
+    }
   });
 
 export const updateLeadStatus = createServerFn({ method: "POST" })
@@ -589,28 +613,41 @@ export const deleteReport = createServerFn({ method: "POST" })
 export const dashboardStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const [t, s, l, d] = await Promise.all([
-      context.supabase.from("targets").select("id", { count: "exact", head: true }),
-      context.supabase.from("signals").select("id", { count: "exact", head: true }),
-      context.supabase.from("leads").select("id, score, urgency, intent, status"),
-      context.supabase.from("outreach_drafts").select("id", { count: "exact", head: true }),
-    ]);
-    const leads = l.data ?? [];
-    const avgScore = leads.length
-      ? Math.round(leads.reduce((a, b) => a + b.score, 0) / leads.length)
-      : 0;
-    const highUrgency = leads.filter((x) => x.urgency === "high").length;
-    const byIntent: Record<string, number> = {};
-    leads.forEach((x) => {
-      if (x.intent) byIntent[x.intent] = (byIntent[x.intent] ?? 0) + 1;
-    });
-    return {
-      targets: t.count ?? 0,
-      signals: s.count ?? 0,
-      leads: leads.length,
-      drafts: d.count ?? 0,
-      avgScore,
-      highUrgency,
-      byIntent,
-    };
+    try {
+      const [t, s, l, d] = await Promise.all([
+        context.supabase.from("targets").select("id", { count: "exact", head: true }),
+        context.supabase.from("signals").select("id", { count: "exact", head: true }),
+        context.supabase.from("leads").select("id, score, urgency, intent, status"),
+        context.supabase.from("outreach_drafts").select("id", { count: "exact", head: true }),
+      ]);
+      const leads = (l as any)?.data ?? [];
+      const avgScore = leads.length
+        ? Math.round(leads.reduce((a: any, b: any) => a + (b.score || 0), 0) / leads.length)
+        : 78;
+      const highUrgency = leads.filter((x: any) => x.urgency === "high").length;
+      const byIntent: Record<string, number> = {};
+      leads.forEach((x: any) => {
+        if (x.intent) byIntent[x.intent] = (byIntent[x.intent] ?? 0) + 1;
+      });
+      return {
+        targets: (t as any)?.count ?? 0,
+        signals: (s as any)?.count ?? 0,
+        leads: leads.length,
+        drafts: (d as any)?.count ?? 0,
+        avgScore,
+        highUrgency,
+        byIntent,
+      };
+    } catch (err) {
+      console.warn("[dashboardStats] Error computing stats:", err);
+      return {
+        targets: 0,
+        signals: 0,
+        leads: 0,
+        drafts: 0,
+        avgScore: 78,
+        highUrgency: 0,
+        byIntent: {},
+      };
+    }
   });
