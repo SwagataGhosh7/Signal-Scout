@@ -23,9 +23,10 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { DepthLayer, TiltCard } from "@/components/depth-system";
-import { Badge, UrgencyBadge } from "./app";
+import { Badge, UrgencyBadge } from "@/components/badges";
 
 export const Route = createFileRoute("/_authenticated/signals")({
+  ssr: false,
   component: SignalsPage,
 });
 

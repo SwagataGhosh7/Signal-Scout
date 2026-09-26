@@ -32,9 +32,10 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react";
-import { Badge } from "./app";
+import { Badge } from "@/components/badges";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
+  ssr: false,
   component: AnalyticsPage,
 });
 

@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/outreach")({
+  ssr: false,
   component: OutreachPage,
 });
 

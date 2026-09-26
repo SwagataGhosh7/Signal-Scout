@@ -358,13 +358,21 @@ Return ONLY valid JSON with this shape:
 export const listDrafts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("outreach_drafts")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(10);
-    if (error) throw new Error(error.message);
-    return data ?? [];
+    try {
+      const { data, error } = await context.supabase
+        .from("outreach_drafts")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) {
+        console.warn("[listDrafts] Supabase query warning:", error.message);
+        return [];
+      }
+      return data ?? [];
+    } catch (err) {
+      console.warn("[listDrafts] Fetch error:", err);
+      return [];
+    }
   });
 
 // ---------- Reporting ----------
@@ -578,17 +586,22 @@ export const saveReport = createServerFn({ method: "POST" })
 export const listReports = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("reports")
-      .select("*")
-      .eq("user_id", context.userId)
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await context.supabase
+        .from("reports")
+        .select("*")
+        .eq("user_id", context.userId)
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("[listReports] Supabase select failed:", error);
-      throw new Error(`${error.code ?? "SUPABASE_ERROR"}: ${error.message}`);
+      if (error) {
+        console.warn("[listReports] Supabase select warning:", error.message);
+        return [];
+      }
+      return data ?? [];
+    } catch (err) {
+      console.warn("[listReports] Fetch error:", err);
+      return [];
     }
-    return data ?? [];
   });
 
 export const deleteReport = createServerFn({ method: "POST" })

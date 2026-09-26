@@ -21,9 +21,10 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { TiltCard } from "@/components/depth-system";
-import { Badge } from "./app";
+import { Badge } from "@/components/badges";
 
 export const Route = createFileRoute("/_authenticated/targets")({
+  ssr: false,
   component: TargetsPage,
 });
 

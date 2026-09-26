@@ -43,6 +43,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { processResume } from "@/lib/resume.functions";
 
 export const Route = createFileRoute("/_authenticated/hiring")({
+  ssr: false,
   component: HiringPage,
 });
 

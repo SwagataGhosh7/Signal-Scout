@@ -6,15 +6,13 @@ import { AiAssistant } from "@/components/ai-assistant";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    await auth.authStateReady();
-    const user = auth.currentUser;
+    const user = auth.currentUser ?? (await auth.authStateReady(), auth.currentUser);
 
     if (!user) {
       console.warn("[RouteGuard] No valid Firebase user — redirecting to /auth");
       throw redirect({ to: "/auth" });
     }
 
-    console.log("[RouteGuard] Session valid for user:", user.email);
     return { user };
   },
   component: Layout,

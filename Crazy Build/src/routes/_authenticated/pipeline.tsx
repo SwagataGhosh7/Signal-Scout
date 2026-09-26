@@ -15,10 +15,11 @@ import {
   CheckCircle,
   HelpCircle,
 } from "lucide-react";
-import { Badge } from "./app";
+import { Badge } from "@/components/badges";
 import { DepthLayer, ParallaxField, TiltCard } from "@/components/depth-system";
 
 export const Route = createFileRoute("/_authenticated/pipeline")({
+  ssr: false,
   component: PipelinePage,
 });
 

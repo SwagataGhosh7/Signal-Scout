@@ -27,6 +27,7 @@ import {
 } from "@/lib/report-generator";
 
 export const Route = createFileRoute("/_authenticated/reports")({
+  ssr: false,
   component: ReportsPage,
 });
 

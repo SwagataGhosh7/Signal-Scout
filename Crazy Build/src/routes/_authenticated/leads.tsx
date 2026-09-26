@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { generateOutreach, listLeads, updateLeadStatus } from "@/lib/signals.functions";
 import { crmStatus, syncLeadToCrm } from "@/lib/crm.functions";
@@ -18,13 +18,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { TiltCard } from "@/components/depth-system";
-import { UrgencyBadge, Badge } from "./app";
+import { UrgencyBadge, Badge } from "@/components/badges";
 import { HackathonLeadGenTrigger } from "@/components/LeadGenTrigger";
 import { LeadProfileCards } from "@/components/LeadProfileCards";
 
 const STATUSES = ["new", "contacted", "qualified", "won", "lost"] as const;
 
 export const Route = createFileRoute("/_authenticated/leads")({
+  ssr: false,
   component: LeadsPage,
 });
 
@@ -36,8 +37,12 @@ function LeadsPage() {
   const crmFn = useServerFn(syncLeadToCrm);
   const crmStatusFn = useServerFn(crmStatus);
 
-  const q = useSuspenseQuery({ queryKey: ["leads"], queryFn: () => listFn() });
-  const crm = useSuspenseQuery({ queryKey: ["crm-status"], queryFn: () => crmStatusFn() });
+  const [q, crm] = useSuspenseQueries({
+    queries: [
+      { queryKey: ["leads"], queryFn: () => listFn() },
+      { queryKey: ["crm-status"], queryFn: () => crmStatusFn() },
+    ],
+  });
 
   const draft = useMutation({
     mutationFn: (id: string) => outreachFn({ data: { lead_id: id } }),

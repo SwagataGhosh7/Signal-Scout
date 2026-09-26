@@ -2,16 +2,36 @@ import { createMiddleware } from "@tanstack/react-start";
 import { auth } from "@/lib/firebase";
 import { supabase } from "./client";
 
+let cachedToken: string | null = null;
+let tokenExpiresAt = 0;
+
+if (typeof window !== "undefined") {
+  auth.onIdTokenChanged((user) => {
+    if (!user) {
+      cachedToken = null;
+      tokenExpiresAt = 0;
+    }
+  });
+}
+
 // Global functionMiddleware in `src/start.ts`: attaches the authenticated bearer token
 export const attachSupabaseAuth = createMiddleware({ type: "function" }).client(
   async ({ next }) => {
     // 1. Check Firebase Authentication
     try {
-      await auth.authStateReady();
-      const user = auth.currentUser;
+      const now = Date.now();
+      if (cachedToken && now < tokenExpiresAt && auth.currentUser) {
+        return next({
+          headers: { Authorization: `Bearer ${cachedToken}` },
+        });
+      }
+
+      const user = auth.currentUser ?? (await auth.authStateReady(), auth.currentUser);
       if (user) {
-        const token = await user.getIdToken();
+        const token = await user.getIdToken(false);
         if (token) {
+          cachedToken = token;
+          tokenExpiresAt = now + 45 * 60 * 1000;
           return next({
             headers: { Authorization: `Bearer ${token}` },
           });

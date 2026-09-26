@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { dashboardStats, listLeads, listSignals, listTargets } from "@/lib/signals.functions";
+import { Badge, UrgencyBadge } from "@/components/badges";
+export { Badge, UrgencyBadge } from "@/components/badges";
 import {
   Activity,
   ArrowRight,
@@ -37,6 +39,7 @@ import {
 } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/app")({
+  ssr: false,
   component: Dashboard,
 });
 
@@ -54,10 +57,14 @@ function Dashboard() {
   const signalsFn = useServerFn(listSignals);
   const targetsFn = useServerFn(listTargets);
 
-  const stats = useSuspenseQuery({ queryKey: ["stats"], queryFn: () => statsFn() });
-  const leads = useSuspenseQuery({ queryKey: ["leads"], queryFn: () => leadsFn() });
-  const signals = useSuspenseQuery({ queryKey: ["signals"], queryFn: () => signalsFn() });
-  const targets = useSuspenseQuery({ queryKey: ["targets"], queryFn: () => targetsFn() });
+  const [stats, leads, signals, targets] = useSuspenseQueries({
+    queries: [
+      { queryKey: ["stats"], queryFn: () => statsFn() },
+      { queryKey: ["leads"], queryFn: () => leadsFn() },
+      { queryKey: ["signals"], queryFn: () => signalsFn() },
+      { queryKey: ["targets"], queryFn: () => targetsFn() },
+    ],
+  });
 
   const s = stats.data || { targets: 0, signals: 0, leads: 0, drafts: 0, avgScore: 78, highUrgency: 0, byIntent: {} };
   const topLeads = (leads.data || []).slice(0, 5);
@@ -549,30 +556,6 @@ function ScoreDot({ score }: { score: number }) {
   return <div className={`h-2 w-2 shrink-0 rounded-full ${color}`} />;
 }
 
-export function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded-full border border-border bg-muted/60 px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
-      {children}
-    </span>
-  );
-}
-
-export function UrgencyBadge({ urgency }: { urgency: string }) {
-  const map: Record<string, string> = {
-    high: "border-destructive/40 text-destructive bg-destructive/10",
-    medium: "border-warning/40 text-warning bg-warning/10",
-    low: "border-success/40 text-success bg-success/10",
-  };
-  return (
-    <span
-      className={`rounded-full border px-2.5 py-0.5 font-mono text-[9px] uppercase font-semibold ${
-        map[urgency] ?? map.medium
-      }`}
-    >
-      {urgency}
-    </span>
-  );
-}
 
 function EmptyState({ label }: { label: string }) {
   return (

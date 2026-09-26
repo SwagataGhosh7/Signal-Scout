@@ -8,8 +8,15 @@ function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
 }
 
+let lastSupabaseHostFailure = 0;
+const HOST_FAILURE_COOLDOWN = 10000;
+
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
-  return (input, init) => {
+  return async (input, init) => {
+    if (Date.now() - lastSupabaseHostFailure < HOST_FAILURE_COOLDOWN) {
+      throw new TypeError("Failed to fetch: Supabase host unreachable (cooling down)");
+    }
+
     const headers = new Headers(
       typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
     );
@@ -27,7 +34,15 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
     }
 
     headers.set("apikey", supabaseKey);
-    return fetch(input, { ...init, headers });
+    const signal = init?.signal ?? AbortSignal.timeout(2000);
+    try {
+      return await fetch(input, { ...init, headers, signal });
+    } catch (err: any) {
+      if (err?.code === "ENOTFOUND" || err?.cause?.code === "ENOTFOUND") {
+        lastSupabaseHostFailure = Date.now();
+      }
+      throw err;
+    }
   };
 }
 

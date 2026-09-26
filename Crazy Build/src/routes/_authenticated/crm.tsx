@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listLeads, updateLeadStatus } from "@/lib/signals.functions";
 import { crmStatus, hubspotConnect } from "@/lib/crm.functions";
@@ -17,9 +17,10 @@ import {
   RefreshCw,
   Loader2,
 } from "lucide-react";
-import { Badge, UrgencyBadge } from "./app";
+import { Badge, UrgencyBadge } from "@/components/badges";
 
 export const Route = createFileRoute("/_authenticated/crm")({
+  ssr: false,
   component: CrmPage,
 });
 
@@ -88,8 +89,12 @@ function CrmPage() {
   const connectHubspotFn = useServerFn(hubspotConnect);
   const updateStatusFn = useServerFn(updateLeadStatus);
 
-  const leadsQ = useSuspenseQuery({ queryKey: ["leads"], queryFn: () => leadsFn() });
-  const crmQ = useSuspenseQuery({ queryKey: ["crm-status"], queryFn: () => statusFn() });
+  const [leadsQ, crmQ] = useSuspenseQueries({
+    queries: [
+      { queryKey: ["leads"], queryFn: () => leadsFn() },
+      { queryKey: ["crm-status"], queryFn: () => statusFn() },
+    ],
+  });
 
   const [activeTab, setActiveTab] = useState<"pipeline" | "connectors">("pipeline");
   const [integrations, setIntegrations] = useState<Record<string, boolean>>({
