@@ -1,17 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { firebaseAuth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
-  deleteUser as firebaseDeleteUser,
   GoogleAuthProvider,
-  GoogleAuthProvider as GoogleAuthProviderClass,
   signInWithPopup,
-  fetchSignInMethodsForEmail,
   sendPasswordResetEmail,
   type AuthError as FirebaseAuthError,
 } from "firebase/auth";
@@ -47,20 +43,20 @@ function mapFirebaseError(error: unknown): string {
   const code = firebaseErr.code ?? "";
 
   const map: Record<string, string> = {
-    "auth/email-already-in-use": "This email is already registered. Try signing in instead.",
-    "auth/invalid-email": "Invalid email address. Please check and try again.",
-    "auth/weak-password": "Password must be at least 6 characters long.",
+    "auth/invalid-credential": "Invalid email or password.",
+    "auth/email-already-in-use": "An account with this email already exists.",
+    "auth/weak-password": "Please choose a stronger password.",
+    "auth/invalid-email": "Please enter a valid email address.",
+    "auth/popup-closed-by-user": "Google sign-in was cancelled.",
+    "auth/popup-blocked": "Google sign-in popup was blocked.",
     "auth/wrong-password": "Incorrect password. Please try again or reset your password.",
     "auth/user-not-found": "No account found with this email. Please sign up first.",
     "auth/user-disabled": "This account has been disabled. Contact support.",
     "auth/too-many-requests": "Too many failed attempts. Please wait a moment and try again.",
     "auth/network-request-failed": "Network error. Check your internet connection and retry.",
-    "auth/popup-closed-by-user": "Google sign-in was cancelled. Try again.",
-    "auth/popup-blocked": "Popup was blocked by the browser. Allow popups for this site.",
     "auth/cancelled-popup-request": "Only one sign-in window at a time. Please try again.",
     "auth/account-exists-with-different-credential":
       "An account with this email already exists using a different sign-in method.",
-    "auth/invalid-credential": "Your credentials are invalid or have expired. Please try again.",
     "auth/operation-not-allowed": "This sign-in method is not enabled. Contact the admin.",
     "auth/requires-recent-login": "Please sign out and sign in again to perform this action.",
     "auth/missing-email": "Email address is required.",
@@ -112,21 +108,6 @@ function validateInputs(opts: {
   return null; // valid
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   SUPABASE ENV GUARD
-   ───────────────────────────────────────────────────────────────────────── */
-function checkSupabaseEnv(): string | null {
-  const url = import.meta.env.VITE_SUPABASE_URL ?? import.meta.env.SUPABASE_URL;
-  const key =
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
-    import.meta.env.VITE_SUPABASE_ANON_KEY ??
-    import.meta.env.SUPABASE_PUBLISHABLE_KEY ??
-    import.meta.env.SUPABASE_ANON_KEY;
-
-  if (!url) return "Supabase URL is missing from environment configuration.";
-  if (!key) return "Supabase Anon Key is missing from environment configuration.";
-  return null;
-}
 
 /* ─────────────────────────────────────────────────────────────────────────
    DECORATIVE COMPONENTS
@@ -232,12 +213,9 @@ function AuthPage() {
 
   useEffect(() => {
     setMounted(true);
-    supabase.auth.getSession().then(({ data }) => {
-      console.log("[Auth] Existing session check:", data.session ? "session found" : "no session");
-      console.log("[Auth] Session:", data.session);
-      console.log("[Auth] User:", data.session?.user ?? null);
-      if (data.session) {
-        // Already authenticated — skip the login page entirely
+    auth.authStateReady().then(() => {
+      if (auth.currentUser) {
+        console.log("[Auth] Existing Firebase session found, redirecting to /app");
         navigate({ to: "/app", replace: true });
       }
     });
@@ -259,7 +237,7 @@ function AuthPage() {
 
   /* ── SIGN UP ─────────────────────────────────────────────────────────── */
   const handleSignUp = async () => {
-    // 1. Validate inputs first — never hit the network with bad data
+    // 1. Validate inputs first
     const validationError = validateInputs({ mode: "signup", email, password, username });
     if (validationError) {
       setFieldError(validationError);
@@ -268,168 +246,30 @@ function AuthPage() {
       return;
     }
 
-    // 2. Check Supabase env
-    const envError = checkSupabaseEnv();
-    if (envError) {
-      setFieldError(envError);
-      toast.error(envError);
-      console.error("[Auth] Env check failed:", envError);
-      return;
-    }
-
     setFieldError(null);
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 3. Firebase — create account
-    let firebaseUid: string | null = null;
-    let firebaseUser: import("firebase/auth").User | null = null;
+    // 2. Firebase createUserWithEmailAndPassword + updateProfile
     try {
       console.log("[Firebase] Attempting createUserWithEmailAndPassword for:", normalizedEmail);
-      const cred = await createUserWithEmailAndPassword(firebaseAuth, normalizedEmail, password);
+      const cred = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
       console.log("[Firebase] User created:", cred.user);
-      firebaseUid = cred.user.uid;
-      firebaseUser = cred.user;
 
-      await updateProfile(cred.user, { displayName: username.trim() });
-      console.log("[Firebase] Profile updated with displayName:", username.trim());
-    } catch (firebaseErr: unknown) {
-      const msg = mapFirebaseError(firebaseErr);
-      console.error("[Firebase] createUserWithEmailAndPassword error:", firebaseErr);
-      setFieldError(msg);
-      toast.error(msg);
-      return;
-    }
-
-    // 4. Supabase — mirror account for database / RLS
-    try {
-      console.log("[Supabase] Attempting signUp mirror for:", normalizedEmail);
-      const { data, error } = await supabase.auth.signUp({
-        email: normalizedEmail,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/app`,
-          data: {
-            full_name: username.trim(),
-            username: username.trim(),
-            firebase_uid: firebaseUid,
-          },
-        },
-      });
-
-      console.log("[Supabase] signUp response data:", data);
-      console.log("[Supabase] signUp response error:", error);
-
-      if (error) {
-        const errMsg = error.message.toLowerCase();
-        // CRITICAL: Email already exists in Supabase. We must DELETE the Firebase account
-        // that was just created to prevent orphaned accounts, then inform the user.
-        if (
-          errMsg.includes("already registered") ||
-          errMsg.includes("already been registered") ||
-          errMsg.includes("already exists")
-        ) {
-          console.warn(
-            "[Supabase] Email already registered in Supabase — deleting orphaned Firebase account.",
-          );
-          if (firebaseUser) {
-            try {
-              await firebaseDeleteUser(firebaseUser);
-              console.log("[Firebase] Orphaned Firebase account deleted successfully.");
-            } catch (delErr) {
-              console.error("[Firebase] Failed to delete orphaned Firebase account:", delErr);
-            }
-          }
-          const conflictMsg =
-            "This email address is already registered. Please sign in with your email and password instead.";
-          setFieldError(conflictMsg);
-          toast.error("Account already exists", { description: conflictMsg, duration: 8000 });
-          return;
-        } else {
-          console.error("[Supabase] signUp error:", error);
-          // Clean up Firebase account if Supabase fails for any other reason
-          if (firebaseUser) {
-            try {
-              await firebaseDeleteUser(firebaseUser);
-              console.log("[Firebase] Firebase account cleaned up after Supabase error.");
-            } catch (delErr) {
-              console.error("[Firebase] Failed to clean up Firebase account:", delErr);
-            }
-          }
-          setFieldError(error.message);
-          toast.error(error.message);
-          return;
-        }
-      }
-
-      // 5. Email confirmation flow
-      const needsConfirmation = data?.user && !data.session && data.user.identities?.length === 0;
-      const identityCreated = data?.user && data.user.identities && data.user.identities.length > 0;
-
-      if (!data?.session) {
-        if (needsConfirmation || (data?.user && !data?.session && identityCreated)) {
-          toast.success("Almost there!", {
-            description: "Please verify your email before signing in. Check your inbox.",
-            duration: 7000,
-          });
-          console.log("[Auth] Email confirmation required.");
-          return;
-        }
-
-        console.warn("[Auth] Supabase signUp returned no session. Attempting immediate sign-in...");
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        console.log("[Supabase] signInWithPassword after signUp data:", signInData);
-        console.log("[Supabase] signInWithPassword after signUp error:", signInError);
-
-        if (signInError) {
-          if (signInError.message.toLowerCase().includes("email not confirmed")) {
-            const msg = "Please verify your email before signing in. Check your inbox.";
-            setFieldError(msg);
-            toast.error("Email not confirmed", { description: msg });
-            return;
-          }
-
-          setFieldError(signInError.message);
-          toast.error(signInError.message);
-          return;
-        }
-
-        if (!signInData?.session) {
-          const msg = "Account created, but no valid session could be established. Please try signing in again.";
-          console.error("[Auth] signInWithPassword after signUp returned no session:", signInData);
-          setFieldError(msg);
-          toast.error(msg);
-          return;
-        }
+      if (username.trim()) {
+        await updateProfile(cred.user, { displayName: username.trim() });
+        console.log("[Firebase] Profile updated with displayName:", username.trim());
       }
 
       toast.success("Welcome to Signal Scout 🚀", {
         description: "Your agent swarm is ready to deploy.",
       });
-      console.log("[Auth] Sign-up complete — invalidating router and navigating to /app");
+
+      console.log("[Auth] Sign-up complete — navigating to /app");
       await router.invalidate();
-      await router
-        .navigate({
-          to: "/app",
-          replace: true,
-        })
-        .then((res) => console.log("[Auth] Sign-up navigation success", res))
-        .catch((err) => console.error("[Auth] Sign-up navigation failed:", err));
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Unexpected error during account creation.";
-      console.error("[Supabase] signUp unexpected error:", err);
-      // Clean up Firebase account on unexpected errors too
-      if (firebaseUser) {
-        try {
-          await firebaseDeleteUser(firebaseUser);
-          console.log("[Firebase] Firebase account cleaned up after unexpected error.");
-        } catch (delErr) {
-          console.error("[Firebase] Failed to clean up Firebase account:", delErr);
-        }
-      }
+      await router.navigate({ to: "/app", replace: true });
+    } catch (firebaseErr: unknown) {
+      const msg = mapFirebaseError(firebaseErr);
+      console.error("[Firebase] createUserWithEmailAndPassword error:", firebaseErr);
       setFieldError(msg);
       toast.error(msg);
     }
@@ -446,151 +286,25 @@ function AuthPage() {
       return;
     }
 
-    // 2. Check Supabase env
-    const envError = checkSupabaseEnv();
-    if (envError) {
-      setFieldError(envError);
-      toast.error(envError);
-      console.error("[Auth] Env check failed:", envError);
-      return;
-    }
-
     setFieldError(null);
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 3. Supabase sign-in (primary auth source)
+    // 2. Firebase signInWithEmailAndPassword
     try {
-      console.log("[Supabase] Attempting signInWithPassword for:", normalizedEmail);
-      let supabaseResult = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
-      console.log("[Supabase] signInWithPassword response data:", supabaseResult.data);
-      console.log("[Supabase] signInWithPassword response error:", supabaseResult.error);
-
-      if (supabaseResult.error) {
-        const errMsgLower = supabaseResult.error.message.toLowerCase();
-
-        if (errMsgLower.includes("email not confirmed")) {
-          const msg = "Please verify your email before signing in. Check your inbox.";
-          setFieldError(msg);
-          toast.error("Email not confirmed", { description: msg });
-          return;
-        }
-
-        if (
-          errMsgLower.includes("invalid login credentials") ||
-          errMsgLower.includes("invalid credentials") ||
-          errMsgLower.includes("user not found")
-        ) {
-          console.warn(
-            "[Auth] Supabase login failed; falling back to Firebase sign-in to recover or mirror the account.",
-          );
-
-          let firebaseUserCredential = null as Awaited<ReturnType<typeof signInWithEmailAndPassword>> | null;
-          try {
-            console.log("[Firebase] Attempting signInWithEmailAndPassword for:", email);
-            firebaseUserCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
-            console.log("[Firebase] Signed in:", firebaseUserCredential.user);
-          } catch (firebaseErr: unknown) {
-            const msg = mapFirebaseError(firebaseErr);
-            console.error("[Firebase] signInWithEmailAndPassword error:", firebaseErr);
-
-            try {
-              const methods = await fetchSignInMethodsForEmail(firebaseAuth, email);
-              console.log("[Firebase] fetchSignInMethodsForEmail for", email, methods);
-              if (methods.length > 0 && !methods.includes("password")) {
-                const providerList = methods.join(", ");
-                const providerMsg =
-                  `This email is registered with ${providerList}. Please sign in using that provider.`;
-                setFieldError(providerMsg);
-                toast.error("Sign in method mismatch", { description: providerMsg, duration: 10000 });
-                return;
-              }
-            } catch (fetchErr) {
-              console.warn(
-                "[Firebase] fetchSignInMethodsForEmail failed while handling credential error:",
-                fetchErr,
-              );
-            }
-
-            setFieldError(msg);
-            toast.error(msg);
-            return;
-          }
-
-          console.log("[Auth] Firebase sign-in succeeded; ensuring Supabase mirror exists.");
-          const { data: mirrorData, error: mirrorError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: { data: { username: email.split("@")[0] } },
-          });
-
-          console.log("[Supabase] Mirror signUp data:", mirrorData);
-          console.log("[Supabase] Mirror signUp error:", mirrorError);
-
-          if (mirrorError && !mirrorError.message.toLowerCase().includes("already")) {
-            setFieldError(mirrorError.message);
-            toast.error(mirrorError.message);
-            return;
-          }
-
-          if (mirrorData?.session) {
-            supabaseResult = { data: mirrorData as any, error: null };
-          } else {
-            const retrySignIn = await supabase.auth.signInWithPassword({ email, password });
-            console.log(
-              "[Supabase] Retry signInWithPassword after mirror creation data:",
-              retrySignIn.data,
-            );
-            console.log(
-              "[Supabase] Retry signInWithPassword after mirror creation error:",
-              retrySignIn.error,
-            );
-            if (retrySignIn.error) {
-              if (retrySignIn.error.message.toLowerCase().includes("email not confirmed")) {
-                const msg = "Please verify your email before signing in. Check your inbox.";
-                setFieldError(msg);
-                toast.error("Email not confirmed", { description: msg });
-                return;
-              }
-              setFieldError(retrySignIn.error.message);
-              toast.error(retrySignIn.error.message);
-              return;
-            }
-            supabaseResult = retrySignIn;
-          }
-        } else {
-          const msg =
-            supabaseResult.error.code === "invalid_credentials"
-              ? "Email or password is incorrect. If you just created your account, please verify your email or reset your password."
-              : supabaseResult.error.message;
-          setFieldError(msg);
-          toast.error(msg);
-          return;
-        }
-      }
-
-      if (!supabaseResult.data?.session) {
-        const msg = "Authentication could not establish a valid session. Please try again.";
-        console.error("[Auth] Sign-in did not return a valid session:", supabaseResult.data);
-        setFieldError(msg);
-        toast.error(msg);
-        return;
-      }
+      console.log("[Firebase] Attempting signInWithEmailAndPassword for:", normalizedEmail);
+      const cred = await signInWithEmailAndPassword(auth, normalizedEmail, password);
+      console.log("[Firebase] Signed in:", cred.user);
 
       toast.success("Signal Scout activated ⚡", {
         description: "All agents are online.",
       });
-      console.log("[Auth] Sign-in complete — invalidating router and navigating to /app");
+
+      console.log("[Auth] Sign-in complete — navigating to /app");
       await router.invalidate();
-      await router
-        .navigate({
-          to: "/app",
-          replace: true,
-        })
-        .then((res) => console.log("[Auth] Sign-in navigation success", res))
-        .catch((err) => console.error("[Auth] Sign-in navigation failed:", err));
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Unexpected error during sign-in.";
-      console.error("[Supabase] signInWithPassword unexpected error:", err);
+      await router.navigate({ to: "/app", replace: true });
+    } catch (firebaseErr: unknown) {
+      const msg = mapFirebaseError(firebaseErr);
+      console.error("[Firebase] signInWithEmailAndPassword error:", firebaseErr);
       setFieldError(msg);
       toast.error(msg);
     }
@@ -616,47 +330,19 @@ function AuthPage() {
     setLoading(true);
     try {
       console.log("[Auth] Initiating password reset for:", normalizedEmail);
-
-      try {
-        await sendPasswordResetEmail(firebaseAuth, normalizedEmail, {
-          url: `${window.location.origin}/auth`,
-        });
-        console.log("[Auth] Firebase password reset email sent successfully.");
-      } catch (firebaseResetErr: unknown) {
-        const firebaseError = firebaseResetErr as FirebaseAuthError;
-        console.error("[Auth] Firebase password reset failed:", firebaseResetErr);
-
-        if (firebaseError?.code === "auth/user-not-found") {
-          const msg = "No account was found for that email address.";
-          setFieldError(msg);
-          toast.error(msg);
-          return;
-        }
-
-        const msg = mapFirebaseError(firebaseResetErr);
-        setFieldError(msg);
-        toast.error(msg);
-        return;
-      }
-
-      try {
-        const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-          redirectTo: `${window.location.origin}/auth`,
-        });
-
-        if (error) {
-          console.error("[Supabase] Password reset request failed:", error);
-          toast.warning("Password reset requested", {
-            description: "A reset email was requested, but Supabase reported an issue. Please check your inbox or try again.",
-          });
-        }
-      } catch (supabaseResetErr) {
-        console.error("[Supabase] Password reset request threw:", supabaseResetErr);
-      }
+      await sendPasswordResetEmail(auth, normalizedEmail, {
+        url: `${window.location.origin}/auth`,
+      });
+      console.log("[Auth] Firebase password reset email sent successfully.");
 
       toast.success("Password reset sent", {
         description: "Check your inbox and spam folder for the reset link.",
       });
+    } catch (firebaseResetErr: unknown) {
+      console.error("[Auth] Firebase password reset failed:", firebaseResetErr);
+      const msg = mapFirebaseError(firebaseResetErr);
+      setFieldError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -687,175 +373,24 @@ function AuthPage() {
   const handleGoogle = async () => {
     if (googleLoading || loading) return;
 
-    // Check Supabase env
-    const envError = checkSupabaseEnv();
-    if (envError) {
-      toast.error(envError);
-      console.error("[Auth] Env check failed:", envError);
-      return;
-    }
-
     setGoogleLoading(true);
+    setFieldError(null);
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
 
       console.log("[OAuth] Opening Google sign-in popup...");
-      const result = await signInWithPopup(firebaseAuth, provider);
-      const credential = GoogleAuthProviderClass.credentialFromResult(result);
+      const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      console.log("[OAuth] Google sign-in success:", user.email);
 
-      // ── Full debug log of OAuth response ──────────────────────────────────
-      console.log("[OAuth] Response:", result);
-      console.log("[OAuth] Credential:", credential);
-      console.log("[OAuth] User Object:", {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        emailVerified: user.emailVerified,
-        providerData: user.providerData,
+      toast.success(`Welcome, ${user.displayName ?? "Scout"} ⚡`, {
+        description: "Your Signal Scout account is ready.",
       });
-      console.log("[OAuth] Provider:", result.providerId);
-      // ─────────────────────────────────────────────────────────────────────
 
-      // STEP 1: Try to sign into Supabase using uid as the stable password
-      // (this works for users who previously registered via Google OAuth)
-      console.log("[Supabase] Attempting Google-mirror sign-in for:", user.email);
-      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
-        email: user.email!,
-        password: user.uid,
-      });
-      console.log("[Supabase] Mirror sign-in data:", signInData);
-      console.log("[Supabase] Mirror sign-in error:", signInErr);
-
-      if (!signInErr && signInData?.session) {
-        // ✅ Existing Google-registered user — session obtained
-        console.log("[Supabase] Session obtained:", signInData.session);
-        toast.success(`Welcome back, ${user.displayName ?? user.email} ⚡`);
-        console.log("[Auth] Google sign-in complete — navigating to /app");
-        await router.invalidate();
-        await router
-          .navigate({ to: "/app", replace: true })
-          .then((res) => console.log("[Auth] Google navigation success", res))
-          .catch((navErr) => console.error("[Auth] Google navigation failed:", navErr));
-        return;
-      }
-
-      // STEP 2: Sign-in failed — try registering a new Supabase account for this Google user
-      console.warn(
-        "[Supabase] Mirror sign-in failed. Attempting to register new Supabase account...",
-      );
-      const { data: signupData, error: signupErr } = await supabase.auth.signUp({
-        email: user.email!,
-        password: user.uid,
-        options: {
-          data: {
-            full_name: user.displayName ?? "",
-            username: user.displayName ?? user.email?.split("@")[0],
-            firebase_uid: user.uid,
-            avatar_url: user.photoURL ?? "",
-            provider: "google",
-          },
-        },
-      });
-      console.log("[Supabase] Mirror sign-up data:", signupData);
-      console.log("[Supabase] Mirror sign-up error:", signupErr);
-
-      if (!signupErr && signupData?.session) {
-        // ✅ New Google user registered and session obtained
-        console.log("[Supabase] New Google account created. Session:", signupData.session);
-        toast.success(`Welcome, ${user.displayName ?? "Scout"} ⚡`, {
-          description: "Your Signal Scout account has been created.",
-        });
-        await router.invalidate();
-        await router
-          .navigate({ to: "/app", replace: true })
-          .then((res) => console.log("[Auth] Google new-user navigation success", res))
-          .catch((navErr) => console.error("[Auth] Google new-user navigation failed:", navErr));
-        return;
-      }
-
-      // STEP 3: signUp also failed — check if it's because this email already has
-      // an Email/Password account in Supabase (the root cause for sinhatumpa84@gmail.com)
-      if (signupErr) {
-        const errMsg = signupErr.message.toLowerCase();
-        console.error("[Supabase] Sign-up error object:", signupErr);
-
-        if (
-          errMsg.includes("already registered") ||
-          errMsg.includes("already been registered") ||
-          errMsg.includes("already exists")
-        ) {
-          // ── ROOT CAUSE DETECTED ───────────────────────────────────────────
-          // This email has an existing Email/Password account in Supabase.
-          // Google sign-in cannot merge these automatically.
-          // We must NOT silently redirect — that triggers the route guard loop.
-          // ─────────────────────────────────────────────────────────────────
-          console.error(
-            "[OAuth] CONFLICT: Email",
-            user.email,
-            "already exists with Email/Password credentials in Supabase.",
-            "Google OAuth UID password does not match the stored password.",
-            "Sign-up error:",
-            signupErr.message,
-          );
-
-          // Try to confirm what sign-in methods this email supports in Firebase
-          try {
-            const methods = await fetchSignInMethodsForEmail(firebaseAuth, user.email!);
-            console.log("[Firebase] Existing sign-in methods for", user.email, ":", methods);
-          } catch (e) {
-            console.warn("[Firebase] Could not fetch sign-in methods:", e);
-          }
-
-          const conflictMsg =
-            `An account with ${user.email} already exists using Email/Password sign-in. ` +
-            `Please sign in with your email and password instead. ` +
-            `After signing in, you can link your Google account from Settings.`;
-
-          setFieldError(conflictMsg);
-          toast.error("Account already exists", {
-            description: conflictMsg,
-            duration: 10000,
-          });
-          // Pre-fill the email field to make it easy for the user
-          setEmail(user.email ?? "");
-          setMode("signin");
-          return;
-        }
-
-        // Some other Supabase signup error
-        const displayMsg = signupErr.message || "Google authentication failed. Please try again.";
-        console.error("[OAuth] Unhandled Supabase sign-up error:", signupErr);
-        setFieldError(displayMsg);
-        toast.error("Google authentication failed", { description: displayMsg });
-        return;
-      }
-
-      // STEP 4: signup succeeded but no session yet (email confirmation required?)
-      if (signupData?.user && !signupData?.session) {
-        console.log(
-          "[Supabase] Account created but no session — email confirmation may be required.",
-        );
-        toast.info("Check your inbox", {
-          description: "A confirmation email has been sent. Please verify to continue.",
-          duration: 8000,
-        });
-        return;
-      }
-
-      // Fallback — should not be reached under normal conditions
-      console.error(
-        "[OAuth] Unexpected state — no session and no error. signInData:",
-        signInData,
-        "signupData:",
-        signupData,
-      );
-      toast.error("Google authentication failed", {
-        description:
-          "An unexpected error occurred. Please try again or sign in with email/password.",
-      });
+      console.log("[Auth] Google sign-in complete — navigating to /app");
+      await router.invalidate();
+      await router.navigate({ to: "/app", replace: true });
     } catch (err: unknown) {
       const fbErr = err as FirebaseAuthError;
       console.error("[OAuth] Caught error:", {
@@ -863,26 +398,23 @@ function AuthPage() {
         message: fbErr?.message,
         error: err,
       });
+
       if (
         fbErr?.code === "auth/popup-closed-by-user" ||
         fbErr?.code === "auth/cancelled-popup-request"
       ) {
-        console.info("[OAuth] Google popup closed by user — no action needed.");
-        return; // silent — user intentionally closed it
-      }
-      if (fbErr?.code === "auth/account-exists-with-different-credential") {
-        // Firebase itself detected a cross-provider conflict
-        const conflictMsg =
-          "This account already exists with a different sign-in method. " +
-          "Please sign in with your email and password.";
-        console.error("[OAuth] Firebase account-exists-with-different-credential:", err);
-        setFieldError(conflictMsg);
-        toast.error("This account already exists with another sign-in method", {
-          description: conflictMsg,
-          duration: 8000,
-        });
+        console.info("[OAuth] Google popup closed by user — cancelled.");
         return;
       }
+
+      if (fbErr?.code === "auth/account-exists-with-different-credential") {
+        const conflictMsg =
+          "This account already exists with a different sign-in method. Please sign in with your email and password.";
+        setFieldError(conflictMsg);
+        toast.error("Account exists with different credential", { description: conflictMsg });
+        return;
+      }
+
       const msg = mapFirebaseError(err);
       console.error("[OAuth] Firebase Google sign-in error:", err);
       setFieldError(msg);

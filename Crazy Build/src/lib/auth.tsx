@@ -1,20 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/firebase";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  type User,
+} from "firebase/auth";
 import { useRouter } from "@tanstack/react-router";
-import type { User, Session } from "@supabase/supabase-js";
 
 type AuthContextType = {
   user: User | null;
-  session: Session | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ data?: unknown; error?: unknown }>;
+  login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
-  signup: (
-    email: string,
-    password: string,
-    options?: unknown,
-  ) => Promise<{ data?: unknown; error?: unknown }>;
+  signup: (email: string, password: string) => Promise<any>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,134 +23,85 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
 
-    // Initial session check using requested syntax
-    const checkInitialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    // Use Firebase authStateReady to ensure initial persistence state is resolved
+    auth.authStateReady().then(() => {
       if (!mounted) return;
-
-      if (session) {
-        setSession(session);
-        setUser(session.user);
-        setLoading(false);
-        console.log("[AuthProvider] initial session:", session);
-        const currentPath = router.state.location.pathname;
-        if (currentPath === "/auth" || currentPath === "/") {
-          console.log(
-            `[AuthProvider] Session exists on startup -> navigating to /app from ${currentPath}`,
-          );
-          router
-            .navigate({ to: "/app", replace: true })
-            .then((res) => console.log("[AuthProvider] Startup redirect navigation success:", res))
-            .catch((e) => console.warn("[AuthProvider] Startup redirect navigation failed:", e));
-        } else {
-          console.log(`[AuthProvider] Session exists on startup, staying on ${currentPath}`);
-        }
-      } else {
-        setSession(null);
-        setUser(null);
-        setLoading(false);
-        console.log("[AuthProvider] initial session: null");
-      }
-    };
-
-    checkInitialSession();
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, sessionArg) => {
-      console.log("[AuthProvider] onAuthStateChange event:", event, "session:", sessionArg);
-      setSession(sessionArg ?? null);
-      setUser(sessionArg?.user ?? null);
+      const currentUser = auth.currentUser;
+      setUser(currentUser);
       setLoading(false);
 
-      // Invalidate and navigate accordingly
+      const currentPath = router.state.location.pathname;
+      if (currentUser && (currentPath === "/auth" || currentPath === "/")) {
+        console.log(`[AuthProvider] User authenticated on startup -> navigating to /app from ${currentPath}`);
+        router.navigate({ to: "/app", replace: true }).catch(() => {});
+      }
+    });
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!mounted) return;
+      console.log("[AuthProvider] onAuthStateChanged user:", firebaseUser?.email ?? null);
+      setUser(firebaseUser);
+      setLoading(false);
       router.invalidate();
-      if (event === "SIGNED_IN") {
+
+      if (firebaseUser) {
         const currentPath = router.state.location.pathname;
         if (currentPath === "/auth" || currentPath === "/") {
           console.log(`[AuthProvider] SIGNED_IN -> navigating to /app from ${currentPath}`);
-          router
-            .navigate({ to: "/app", replace: true })
-            .then((res) =>
-              console.log("[AuthProvider] AuthState SIGNED_IN navigation success:", res),
-            )
-            .catch((e) => console.warn("[AuthProvider] SIGNED_IN navigate error:", e));
-        } else {
-          console.log(`[AuthProvider] SIGNED_IN event fired, but staying on ${currentPath}`);
+          router.navigate({ to: "/app", replace: true }).catch(() => {});
         }
-      }
-      if (event === "SIGNED_OUT") {
-        console.log("[AuthProvider] SIGNED_OUT -> navigating to /auth");
-        router
-          .navigate({ to: "/auth", replace: true })
-          .then((res) =>
-            console.log("[AuthProvider] AuthState SIGNED_OUT navigation success:", res),
-          )
-          .catch((e) => console.warn("[AuthProvider] SIGNED_OUT navigate error:", e));
+      } else {
+        const currentPath = router.state.location.pathname;
+        if (currentPath.startsWith("/_authenticated") || currentPath.startsWith("/app")) {
+          console.log(`[AuthProvider] SIGNED_OUT -> navigating to /auth from ${currentPath}`);
+          router.navigate({ to: "/auth", replace: true }).catch(() => {});
+        }
       }
     });
 
     return () => {
       mounted = false;
-      try {
-        sub.subscription.unsubscribe();
-      } catch {
-        // ignore
-      }
+      unsubscribe();
     };
   }, [router]);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
-    const res = await supabase.auth.signInWithPassword({ email, password });
-    if (res.error) {
-      console.error("[AuthProvider] login error", res.error);
-      setLoading(false);
-    } else {
-      console.log("[AuthProvider] login success", res.data.session);
-      setSession(res.data.session ?? null);
-      setUser(res.data.session?.user ?? null);
+    try {
+      const res = await signInWithEmailAndPassword(auth, email, password);
+      setUser(res.user);
+      return res;
+    } finally {
       setLoading(false);
     }
-    return res;
   };
 
-  const signup = async (email: string, password: string, options?: any) => {
+  const signup = async (email: string, password: string) => {
     setLoading(true);
-    const res = await supabase.auth.signUp({ email, password, options });
-    if (res.error) {
-      console.error("[AuthProvider] signup error", res.error);
-      setLoading(false);
-    } else {
-      console.log("[AuthProvider] signup success", res.data.user);
-      if (res.data.session) {
-        setSession(res.data.session);
-        setUser(res.data.session.user);
-      } else if (res.data.user) {
-        setUser(res.data.user);
-      }
+    try {
+      const res = await createUserWithEmailAndPassword(auth, email, password);
+      setUser(res.user);
+      return res;
+    } finally {
       setLoading(false);
     }
-    return res;
   };
 
   const logout = async () => {
     setLoading(true);
-    await supabase.auth.signOut();
+    await signOut(auth);
     setUser(null);
-    setSession(null);
     setLoading(false);
     console.log("[AuthProvider] logout complete");
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, login, logout, signup }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, signup }}>
       {children}
     </AuthContext.Provider>
   );

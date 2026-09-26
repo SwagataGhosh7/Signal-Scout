@@ -12,7 +12,7 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/firebase";
 import { ThemeProvider } from "../components/theme-provider";
 
 function NotFoundComponent() {
@@ -133,20 +133,11 @@ function RootComponent() {
 
   useEffect(() => {
     const checkStartupAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      console.log("[Root] startup session check:", session ?? null);
+      await auth.authStateReady();
+      const user = auth.currentUser;
+      console.log("[Root] startup Firebase user check:", user?.email ?? null);
 
-      // Debugging logs on application startup
-      console.log("[Debug Logs] === Startup ===");
-      console.log("[Debug Logs] Current URL on startup:", window.location.href);
-      console.log("[Debug Logs] Current Session on startup:", session);
-      console.log("[Debug Logs] Authenticated User on startup:", session?.user ?? null);
-      console.log("[Debug Logs] Router State on startup:", routerState);
-      console.log("[Debug Logs] ===============");
-
-      if (session) {
+      if (user) {
         const currentPath = routerState.location.pathname;
         if (currentPath === "/" || currentPath === "/auth") {
           console.log(`[Root] Redirecting to /app immediately on startup from ${currentPath}...`);
@@ -163,17 +154,6 @@ function RootComponent() {
     };
     checkStartupAuth();
   }, []);
-
-  // Debugging logs when router state changes
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("[Debug Logs] Router State Changed");
-      console.log("[Debug Logs] Current URL:", window.location.href);
-      console.log("[Debug Logs] Current Session:", session);
-      console.log("[Debug Logs] Authenticated User:", session?.user ?? null);
-      console.log("[Debug Logs] Router State:", routerState);
-    });
-  }, [routerState]);
 
   return (
     <RootShell>

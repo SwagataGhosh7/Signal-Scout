@@ -18,7 +18,8 @@ import {
   Sparkles,
   Briefcase,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { signOut as firebaseSignOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { DepthLayer } from "@/components/depth-system";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -55,7 +56,7 @@ export function AppNav() {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await firebaseSignOut(auth);
     navigate({ to: "/" });
   };
 

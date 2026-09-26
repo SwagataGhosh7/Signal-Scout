@@ -1,34 +1,21 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/firebase";
 import { AppNav } from "@/components/app-nav";
 import { AiAssistant } from "@/components/ai-assistant";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    // Use getSession() — reads from localStorage instantly, no network race.
-    // getUser() makes a network round-trip and can return null before the
-    // newly-created session propagates, causing a false redirect to /auth.
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+    await auth.authStateReady();
+    const user = auth.currentUser;
 
-    console.log("[RouteGuard] getSession result:", { session, error });
-    console.log("[Debug Logs] === RouteGuard ===");
-    console.log("[Debug Logs] Current URL in RouteGuard:", window.location.href);
-    console.log("[Debug Logs] Current Session in RouteGuard:", session);
-    console.log("[Debug Logs] Authenticated User in RouteGuard:", session?.user ?? null);
-    console.log("[Debug Logs] ==================");
-
-    if (error || !session) {
-      console.warn("[RouteGuard] No valid session — redirecting to /auth");
-      console.log("[Debug Logs] Navigation Result: redirecting to /auth");
+    if (!user) {
+      console.warn("[RouteGuard] No valid Firebase user — redirecting to /auth");
       throw redirect({ to: "/auth" });
     }
 
-    console.log("[RouteGuard] Session valid for user:", session.user.email);
-    return { user: session.user };
+    console.log("[RouteGuard] Session valid for user:", user.email);
+    return { user };
   },
   component: Layout,
 });
